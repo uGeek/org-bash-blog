@@ -1,0 +1,43 @@
+#+TITLE: uGeek - Blog de Tecnología
+#+LINK: https://ugeek.github.io/blog
+#+DESCRIPTION: Blog de Tecnología, Android, GNU Linux, Servidores, y mucho más. Blog vinculado al Blog del Podcast de uGeek
+#+KEYWORDS: GNU, linux, Raspberry, android, domótica 
+#+AUTHOR: Angel
+#+LANGUAGE: es
+#+STARTUP: logdone
+#+STARTUP: inlineimages
+#+OPTIONS: toc:t num:nil ^:nil toc:nil title:nil author:nil date:nil created:nil'
+#+startup: hideblocks
+#+HTML_HEAD: <div id="logo"><a href="index.html"><img src="__icon/ugeek.png" border="0"  width="90" height="90" alt="uGeek"></a></div>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="__css/stylesheet.css" /><link rel="alternate" type="application/rss+xml" href="https://ugeek.gitlab.io/feed.xml" title="uGeek - Blog de Tecnología">   
+#+HTML_HEAD:  
+#+html: <link href='http://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'/>
+#+html: <div id="name"><a href="index.html"><tt>Blog de Tecnología</tt></div></a>
+#+html: <div id="icon"><a href="https://ugeek.github.io/podcast.xml" title="rss"><img src="__icon/podcast.png"  width="25" height="25"></a>&nbsp;&nbsp;<a href="feed.xml"><img src="__icon/rss.png"  width="25" height="25"></a>&nbsp;&nbsp;<a href="https://twitter.com/ugeekpodcast"><img src="__icon/twitter.png"  width="25" height="25"></a>&nbsp;&nbsp;<a href="https://t.me/uGeek"><img src="__icon/telegram.png"  width="25" height="25" alt="uGeek"></a></div>
+#+html: <div id="menu"><a href="list.html"><tt>Artículos</tt></a>&nbsp;&nbsp;&nbsp;<a href="tag.html"><tt>Tags</tt></a>&nbsp;&nbsp;&nbsp;<a href="https://ugeek.github.io/"><tt>Podcast</tt></a></div>
+#+html: <div id="ugeek"><a href="index.html" title="uGeek"><tt>uGeek</tt></a></div>
+#+html:<br><br><br><br><br><br><br><br><br><br>                                                                                             
+
+
+
+
+
+
+* TODO Eliminar líneas en Blanco con sed
+:PROPERTIES:
+:TITLE: Eliminar líneas en Blanco con sed
+:EXPORT_FILE_NAME: eliminar-lineas-en-blanco
+:DESCRIPTION: Como podemos eliminar líneas en Blanco
+:EXPORT_DATE: 2018-12-27
+:IMAGE: ./images/blog/dockeronrapi.png
+:CATEGORY: unix
+:TAG: bash,unix,terminal,sed
+:URL_AUDIO: https://anchor.fm/s/106db04/podcast/play/1672064/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2018-10-5%2FComo-Actualizar-tus-Dockers-9eca01f3ed771.m4a
+:END:
+
+Para eliminar líneas en Blanco de un archivo de texto, podriamos utilizar *sed*.
+
+[[./images-blog/sed.png]]
+
+
+=cat archivo | sed '/^ *$/d' > nuevo_archivo=
