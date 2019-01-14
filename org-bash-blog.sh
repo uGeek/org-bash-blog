@@ -53,17 +53,16 @@ GOOGLE_ANALITYCS=$(echo "#+HTML_HEAD: <!-- Global site tag (gtag.js) - Google An
 TITLE=$(grep "#+TITLE:" blog.org | cut -d " " -f2-)
 LINK=$(grep "#+LINK:" blog.org | cut -d " " -f2-)
 DESCRIPTION=$(grep "#+DESCRIPTION:" blog.org | cut -d " " -f2-)
-grep ":TITLE:" blog.org | cut -d " " -f2- > title
+grep ":TITLE:" blog.org | cut -d " " -f2- | sed 's/,/|/g' > title
 grep ":EXPORT_FILE_NAME:" blog.org | cut -d " " -f2- | sed 's/ /-/g' | awk '{print tolower($0)}' > link
 grep ":DESCRIPTION:" blog.org | cut -d " " -f2- | sed 's/,/|/g'> description 
 grep ":EXPORT_DATE:"  blog.org | cut -d " " -f2- > date-
 grep ":CATEGORY:"  blog.org | cut -d " " -f2- > category
-grep ":TAG:" blog.org | cut -d " " -f2- | tr -d ' ' > tag
+grep ":TAG:" blog.org | cut -d " " -f2- | tr -d ' ' | sed "s|$|,,,,,,,,,|" | cut -d, -f -10 > tag
 cat date- |  tr -d '-' > date
-paste -d, title link description date- category tag > posts.csv
 paste -d, date title link description date- category tag  > postsID.csv
-cat postsID.csv | sort -r | cut -d, -f2-10 > posts.csv
-cat postsID.csv | sort | cut -d, -f2-10 > posts4feed.csv
+cat postsID.csv | sort -r | cut -d, -f2- > posts.csv
+cat postsID.csv | sort | cut -d, -f2- > posts4feed.csv
 cat posts.csv | cut -d "," -f5 | sed '/^ *$/d' | uniq | sort > category.csv
 cat tag | cut -d "," -f1 > tags.csv
 cat tag | cut -d "," -f2 >> tags.csv 
@@ -76,6 +75,7 @@ cat tag | cut -d "," -f8 >> tags.csv
 cat tag | cut -d "," -f9 >> tags.csv
 cat tag | cut -d "," -f10 >> tags.csv
 cat tags.csv | sed '/^ *$/d' | sort | uniq > tag.csv
+echo " " >> blog.org
 NUM_POSTS=$(cat posts.csv |  wc -l)
 TODO=$(grep -irq "* TODO" blog.org)
 if [ $? -eq 0 ]; then
@@ -112,7 +112,7 @@ OTHERSDATE=$(echo  $LINEA | cut -d, -f4)
 echo " - [[$LINK/post/$OTHERSDATE-$OTHERSLINKS.html][$OTHERSTITLE]] " >> temp_post.org
 echo " "
 done < category_temp_post.csv
-FILE_TITLE=$(grep ":TITLE:" temp_post.org | cut -d " " -f2-)
+FILE_TITLE=$(grep ":TITLE:" temp_post.org | cut -d " " -f2- | sed 's/|/,/g')
 FILE_NAME=$(grep ":EXPORT_FILE_NAME:" temp_post.org | cut -d " " -f2- |awk '{print tolower($0)}' |  sed 's/ /-/g')
 FILE_DATE=$(grep ":EXPORT_DATE:" temp_post.org | cut -d " " -f2)
 FILE=$(echo "$FILE_DATE-$FILE_NAME")
@@ -154,7 +154,7 @@ echo '<?xml version="1.0" encoding="utf-8"?>
     <atom:link href="'$LINK'/feed.xml" rel="self" type="application/rss+xml" />
     <generator>org-bash-blog static site generator (https://github.com/ugeek/org-bash-blog)</generator>'> feed.xml
 while read LINEA; do 
-TITLE_F="$(echo $LINEA | cut -d, -f1)"
+TITLE_F="$(echo $LINEA | cut -d, -f1 | sed 's/|/,/g')"
 LINK_P="$(echo $LINEA | cut -d, -f2)"
 DESC="$(echo $LINEA | cut -d, -f3 | sed 's/|/,/g')"
 DATE="$(echo $LINEA | cut -d, -f4)"
@@ -188,7 +188,7 @@ echo '<?xml version="1.0" encoding="utf-8"?>
     <atom:link href="'$LINK'/feed.xml" rel="self" type="application/rss+xml" />
     <generator>org-bash-blog static site generator (https://github.com/ugeek/org-bash-blog)</generator>'> $WORD.xml
 while read LINEA; do 
-TITLE_F="$(echo $LINEA | cut -d, -f1)"
+TITLE_F="$(echo $LINEA | cut -d, -f1 | sed 's/|/,/g')"
 LINK_P="$(echo $LINEA | cut -d, -f2)"
 DESC="$(echo $LINEA | cut -d, -f3 | sed 's/|/,/g')"
 DATE="$(echo $LINEA | cut -d, -f4)"
@@ -214,7 +214,7 @@ echo " " >> index.org
 echo "* Últimos Artículos Publicados" >> index.org
 echo " " >> index.org
 while read LINEA; do 
-TPOST=$(echo $LINEA | cut -d, -f1)
+TPOST=$(echo $LINEA | cut -d, -f1 | sed 's/|/,/g')
 UPOST=$(echo $LINEA | cut -d, -f2)
 DPOST=$(echo $LINEA | cut -d, -f4)
 echo "- /$DPOST/ - [[$LINK/post/$DPOST-$UPOST.html][$TPOST]] " >> index.org
@@ -234,7 +234,7 @@ echo "$GOOGLE_ANALITYCS" >> list.org
 echo "* $NUM_POSTS Artículos Publicados" >> list.org
 echo " " >> list.org
 while read LINEA; do 
-TPOST=$(echo $LINEA | cut -d, -f1)
+TPOST=$(echo $LINEA | cut -d, -f1 | sed 's/|/,/g')
 UPOST=$(echo $LINEA | cut -d, -f2)
 DPOST=$(echo $LINEA | cut -d, -f4)
 echo "- /$DPOST/ - [[$LINK/post/$DPOST-$UPOST.html][$TPOST]] " >> list.org
@@ -257,7 +257,7 @@ grep -i "$TAG" posts.csv > temp_tag.csv
 echo "** $TAG" >> tag.org
 NUM_TAGS=$(cat tag.csv | wc -l)
 while read LINEA; do 
-TPOST=$(echo $LINEA | cut -d, -f1)
+TPOST=$(echo $LINEA | cut -d, -f1 | sed 's/|/,/g' )
 UPOST=$(echo $LINEA | cut -d, -f2)
 DPOST=$(echo $LINEA | cut -d, -f4)
 echo "- /$DPOST/ - [[$LINK/post/$DPOST-$UPOST.html][$TPOST]] " >> tag.org
@@ -278,3 +278,4 @@ rm  posts4feed.csv postsID.csv
 rm tag.csv tags.csv tag temp_post.org
 rm category.csv
 rm title link description category date date-  
+sed '$d' blog.org
