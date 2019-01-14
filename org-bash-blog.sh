@@ -278,4 +278,4 @@ rm  posts4feed.csv postsID.csv
 rm tag.csv tags.csv tag temp_post.org
 rm category.csv
 rm title link description category date date-  
-sed '$d' blog.org
+sed -i '$d' blog.org
