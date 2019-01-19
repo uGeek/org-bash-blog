@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# <org-bash-blog v3. Build a blog from a single orgmode file with emacs and all the bash power>
+# <org-bash-blog v4.5. Build a blog from a single orgmode file with emacs and all the bash power>
 #
 # Copyright (C) 2019 Angel. uGeek
 # ugeekpodcast@gmail.com
@@ -56,11 +56,12 @@ DESCRIPTION=$(grep "#+DESCRIPTION:" blog.org | cut -d " " -f2-)
 grep ":TITLE:" blog.org | cut -d " " -f2- | sed 's/,/|/g' > title
 grep ":EXPORT_FILE_NAME:" blog.org | cut -d " " -f2- | sed 's/ /-/g' | awk '{print tolower($0)}' > link
 grep ":DESCRIPTION:" blog.org | cut -d " " -f2- | sed 's/,/|/g'> description 
-grep ":EXPORT_DATE:"  blog.org | cut -d " " -f2- > date-
+grep ":EXPORT_DATE:"  blog.org | cut -d " " -f2 > date-
+grep ":EXPORT_DATE:"  blog.org | cut -d " " -f3 > hour
 grep ":CATEGORY:"  blog.org | cut -d " " -f2- > category
 grep ":TAG:" blog.org | cut -d " " -f2- | tr -d ' ' | sed "s|$|,,,,,,,,,|" | cut -d, -f -10 > tag
 cat date- |  tr -d '-' > date
-paste -d, date title link description date- category tag  > postsID.csv
+paste -d, date title link description date- category tag hour > postsID.csv
 cat postsID.csv | sort -r | cut -d, -f2- > posts.csv
 cat postsID.csv | sort | cut -d, -f2- > posts4feed.csv
 cat posts.csv | cut -d "," -f5 | sed '/^ *$/d' | uniq | sort > category.csv
@@ -97,7 +98,20 @@ sed -n "5,20 p" blog.org >> temp_post.org
 cat blog.org | sed -n  "$ONE_LINE,$LAST_LINE"p | sed 's/* TODO/*/g' >> temp_post.org
 ONE_LINE=$(echo $TWO_LINE)
 PUB=$(expr $PUB + 1)
-echo "Publicando Artículo Nº $PUB "
+echo "Publicando Artículo Nº $PUB     $(grep ":TITLE:" temp_post.org | cut -d " " -f2-)"
+
+DATE_MOD=$(grep ":EXPORT_DATE:" temp_post.org | cut -d " " -f4)
+if [ -n "$DATE_MOD" ];
+then
+    echo " "
+    echo " ***** Artículo Modificado *****"
+    UPDATE=$(echo " y *actualizado* el $(date -d"$DATE_MOD" +'%A %d %B del %Y')")
+fi
+
+echo "#+HTML: <br>" >> temp_post.org
+echo "Publicado por Angel el $(date -d"$FILE_DATE" +'%A %d %B del %Y') $UPDATE" >> temp_post.org
+UPDATE=$(echo " ")
+    
 echo "#+HTML: <br><br> " >> temp_post.org
 echo "También te puede interesar:
  "  >> temp_post.org
@@ -122,7 +136,7 @@ sed -i "1i #+DESCRIPTION: $DESCRIPTION_P" temp_post.org
 sed -i "1i #+LINK: $LINK" temp_post.org
 FILE_TAG=$(grep ":TAG:" temp_post.org | cut -d " " -f2-)
 TAG=$(echo $FILE_TAG | sed 's/|/,/g')
-sed -i "1i #+KEYWORDS: $TAG" temp_post.org                                                                                                  
+sed -i "1i #+KEYWORDS: $TAG" temp_post.org
 echo "#+TITLE: $FILE_TITLE" > $FILE.org
 cat temp_post.org >> $FILE.org
 ORG=$(echo '#+HTML:<br><br><br><p style="text-align: center;">Powered by <a href="https://github.com/ugeek/org-bash-blog" target="_blank" rel="noopener">org-bash-blog</a></p><br><p style="text-align: center;">Writing in orgmode whith emacs</p>')
@@ -138,6 +152,8 @@ sed -i 's|href="tag.html"|./href="../tag.html"|g' $FILE.html
 mv $FILE.html post/$FILE.html
 done < TODO.txt
 rm TODO.txt
+clear
+echo "Generando Feed"
 TODAY=$(date +'%A %d de %B del %Y')
 echo '<?xml version="1.0" encoding="utf-8"?>
 <rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
@@ -158,19 +174,39 @@ TITLE_F="$(echo $LINEA | cut -d, -f1 | sed 's/|/,/g')"
 LINK_P="$(echo $LINEA | cut -d, -f2)"
 DESC="$(echo $LINEA | cut -d, -f3 | sed 's/|/,/g')"
 DATE="$(echo $LINEA | cut -d, -f4)"
-DATEPUB="$(LANG=en_us_88591 ; date -d"$DATE" +'%a, %d %b %Y 18:00 +0100')"
+HORA="$(echo $LINEA | cut -d, -f16)"
+DATEPU="$(LANG=en_us_88591 ; date -d"$DATE" +'%a, %d %b %Y')"
+DATEPUB=$(echo "$DATEPU $HORA +0100")
 LANG=locale
-GUID="http://ugeek.gitlab.io"
+GUID="http://ugeek.github.io"
 echo "   <item>" >> feed.xml
 echo "    <title>$TITLE_F</title>" >> feed.xml
 echo "    <link>$LINK/post/$DATE-$LINK_P.html</link>" >> feed.xml
-echo "    <description>$DESC</description>" >> feed.xml
+echo "    <description>$DESC... 
+&lt;p&gt;Sigue leyendo el post completo de &lt;a href="$LINK/post/$DATE-$LINK_P.html"&gt;$TITLE_F&lt;/a&gt;
+
+&lt;/a&gt;&lt;/p&gt;&lt;p&gt;
+
+&lt;a href="$LINK"&gt;Visita $TITLE&lt;/a&gt;
+
+&lt;/a&gt;&lt;/p&gt;&lt;p&gt;
+
+&lt;a href="https://ugeek.github.io"&gt;Visita uGeek Podcast&lt;/a&gt;
+
+&lt;/a&gt;&lt;/p&gt;&lt;p&gt;
+
+&lt;a href="http://feeds.feedburner.com/ugeek"&gt;Suscribete al Podcast de uGeek&lt;/a&gt;
+
+</description>" >> feed.xml
+
+
 echo "    <pubDate>$DATEPUB</pubDate>" >> feed.xml
 echo "    <guid>$LINK/post/$DATE-$LINK_P.html</guid>
    </item>" >> feed.xml
 done < posts.csv
 echo "  </channel>
 </rss>" >> feed.xml
+echo "Generando Feed por Categoría"
 WORD="emacs"
 awk '/,emacs,/ { print }' posts.csv > emacs.csv
 echo '<?xml version="1.0" encoding="utf-8"?>
@@ -205,6 +241,7 @@ echo "    <guid>$LINK/post/$DATE-$LINK_P.html</guid>
 done < emacs.csv
 echo "  </channel>
 </rss>" >> $WORD.xml
+echo "Generando Página Home"
 cat posts.csv | head -n5 > posts_home.csv
 sed -n "1,20 p" blog.org > index.org
 echo "$GOOGLE_ANALITYCS" >> index.org
@@ -226,6 +263,7 @@ emacs index.org --batch -f org-html-export-to-html --kill
 sed -i 's|__icon/|icon/|g' index.html
 sed -i 's|__css/|css/|g' index.html
 rm index.org posts_home.csv
+echo "Generando Lista de Artículos"
 echo "#+TITLE: Artículos. $TITLE" > list.org
 echo "#+LINK: $LINK/list.html" >> list.org
 echo "#+DESCRIPTION: Etiquetas de $TITLE" >> list.org
@@ -245,6 +283,7 @@ emacs list.org --batch -f org-html-export-to-html --kill
 sed -i 's|__icon/|icon/|g' list.html
 sed -i 's|__css/|css/|g' list.html
 rm list.org
+echo "Generando Clasificación por Tags"
 echo "#+TITLE: Tags. $TITLE" > tag.org
 echo "#+LINK: $LINK/tag.html" >> tag.org
 echo "#+DESCRIPTION: Etiquetas de $TITLE" >> tag.org
@@ -276,6 +315,6 @@ fi
 rm posts.csv emacs.csv
 rm  posts4feed.csv postsID.csv 
 rm tag.csv tags.csv tag temp_post.org
-rm category.csv
+rm category.csv hour
 rm title link description category date date-  
 sed -i '$d' blog.org
