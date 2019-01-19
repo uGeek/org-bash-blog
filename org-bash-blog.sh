@@ -99,7 +99,7 @@ cat blog.org | sed -n  "$ONE_LINE,$LAST_LINE"p | sed 's/* TODO/*/g' >> temp_post
 ONE_LINE=$(echo $TWO_LINE)
 PUB=$(expr $PUB + 1)
 echo "Publicando Artículo Nº $PUB     $(grep ":TITLE:" temp_post.org | cut -d " " -f2-)"
-
+FILE_DATE=$(grep ":EXPORT_DATE:" temp_post.org | cut -d " " -f2)
 DATE_MOD=$(grep ":EXPORT_DATE:" temp_post.org | cut -d " " -f4)
 if [ -n "$DATE_MOD" ];
 then
