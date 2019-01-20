@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# <org-bash-blog v4.5. Build a blog from a single orgmode file with emacs and all the bash power>
+# <org-bash-blog v4.6. Build a blog from a single orgmode file with emacs and all the bash power>
 #
 # Copyright (C) 2019 Angel. uGeek
 # ugeekpodcast@gmail.com
@@ -152,6 +152,7 @@ sed -i 's|href="tag.html"|./href="../tag.html"|g' $FILE.html
 mv $FILE.html post/$FILE.html
 done < TODO.txt
 rm TODO.txt
+xdg-open "post/$FILE.html" &
 clear
 echo "Generando Feed"
 TODAY=$(date +'%A %d de %B del %Y')
