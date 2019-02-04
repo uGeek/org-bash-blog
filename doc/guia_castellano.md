@@ -18,6 +18,7 @@ Linux y tener instalada emacs26 o superior.
 
 ## Blogs que utilizan org-bash-blog 
 
+- <https://ugeek.github.io/blog>
 - <https://elblogdelazaro.gitlab.io>
 - <https://www.quijotelibre.com>
 
@@ -64,7 +65,7 @@ La fecha de modificación del artículo será el 14 de febrero de 2019
 
 Para publicar un post, tenemos que cambiar el estado del post creado en  blog.org a TODO. 
 
-EL archivo **TODO a publicar,  **siempre tiene que estar el último en la lista de artículos del blog.org. 
+EL archivo **TODO a publicar**, siempre tiene que estar el último en la lista de artículos del blog.org. 
 
 Puedes dejar todos los estados en TODO, para volver a crear todos los archivos html.  De esta manera, las sugerencias con otras páginas relacionadas de la misma categoría se actualizarán. 
 
