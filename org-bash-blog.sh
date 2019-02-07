@@ -152,7 +152,7 @@ sed -i 's|href="tag.html"|./href="../tag.html"|g' $FILE.html
 mv $FILE.html post/$FILE.html
 done < TODO.txt
 rm TODO.txt
-xdg-open "post/$FILE.html" &
+firefox "post/$FILE.html" &
 clear
 echo "Generando Feed"
 TODAY=$(date +'%A %d de %B del %Y')
