@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# <org-bash-blog v4.6. Build a blog from a single orgmode file with emacs and all the bash power>
+# <org-bash-blog v4.7. Build a blog from a single orgmode file with emacs and all the bash power>
 #
 # Copyright (C) 2019 Angel. uGeek
 # ugeekpodcast@gmail.com
@@ -78,11 +78,11 @@ cat tag | cut -d "," -f10 >> tags.csv
 cat tags.csv | sed '/^ *$/d' | sort | uniq > tag.csv
 echo " " >> blog.org
 NUM_POSTS=$(cat posts.csv |  wc -l)
-TODO=$(grep -irq "* TODO" blog.org)
+TODO=$(grep -irq "^* TODO" blog.org)
 if [ $? -eq 0 ]; then
 clear
 echo ">>> org-bash-blog va a publicar el Post <<<"
-grep -n "* TODO" blog.org |  cut -d ":" -f1 > TODO.txt
+grep -n "^* TODO" blog.org |  cut -d ":" -f1 > TODO.txt
 LINES_BLOG=$(cat blog.org  | wc -l)
 cat blog.org  | wc -l >> TODO.txt
 echo "Hay $NUM_POSTS Artículos y $LINES_BLOG líneas en Blog.org"
