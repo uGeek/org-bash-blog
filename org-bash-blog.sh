@@ -120,7 +120,7 @@ grep -i $CATEGORY posts.csv | sed '1d' > category_temp_post.csv
 cat category_temp_post.csv | head -n10 > cat_temp.csv
 cp cat_temp.csv category_temp_post.csv
 while read LINEA; do  
-OTHERSTITLE=$(echo $LINEA | cut -d, -f1)
+OTHERSTITLE=$(echo $LINEA | cut -d, -f1 | sed 's/|/,/g')
 OTHERSLINKS=$(echo $LINEA | cut -d, -f2)
 OTHERSDATE=$(echo  $LINEA | cut -d, -f4)
 echo " - [[$LINK/post/$OTHERSDATE-$OTHERSLINKS.html][$OTHERSTITLE]] " >> temp_post.org
