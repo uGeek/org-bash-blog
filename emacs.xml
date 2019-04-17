@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+  <channel>
+    <title>uGeek - Blog de Tecnología</title>
+    <link>https://ugeek.github.io/blog</link>
+    <description>Blog de Tecnología, Android, GNU Linux, Servidores, y mucho más. Blog vinculado al Blog del Podcast de uGeek</description>
+    <image>
+       <url>https://ugeek.github.io/ugeek.png</url>
+       <title>uGeek - Blog de Tecnología</title>
+       <link>https://ugeek.github.io/blog</link>
+    </image>
+    <language>es</language>
+    <atom:link href="https://ugeek.github.io/blog/feed.xml" rel="self" type="application/rss+xml" />
+    <generator>org-bash-blog static site generator (https://github.com/ugeek/org-bash-blog)</generator>
+  </channel>
+</rss>

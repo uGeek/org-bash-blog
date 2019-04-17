@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+  <channel>
+    <title>uGeek - Blog de Tecnología</title>
+    <link>https://ugeek.github.io/blog</link>
+    <description>Blog de Tecnología, Android, GNU Linux, Servidores, y mucho más. Blog vinculado al Blog del Podcast de uGeek</description>
+    <image>
+       <url>https://ugeek.github.io/ugeek.png</url>
+       <title>uGeek - Blog de Tecnología</title>
+       <link>https://ugeek.github.io/blog</link>
+    </image>
+    <language>es</language>
+    <atom:link href="https://ugeek.github.io/blog/feed.xml" rel="self" type="application/rss+xml" />
+    <generator>org-bash-blog static site generator (https://github.com/ugeek/org-bash-blog)</generator>
+   <item>
+    <title>Eliminar líneas en Blanco con sed</title>
+    <link>https://ugeek.github.io/blog/post/2018-12-27-eliminar-lineas-en-blanco.html</link>
+    <description>
+&lt;img src="https://ugeek.github.io/blog/images/images-blog.png" alt="Eliminar líneas en Blanco con sed"&gt;
+&lt;br&gt;&lt;p&gt;Como podemos eliminar líneas en Blanco... 
+&lt;p&gt;Sigue leyendo el post completo de &lt;a href=https://ugeek.github.io/blog/post/2018-12-27-eliminar-lineas-en-blanco.html&gt;Eliminar líneas en Blanco con sed&lt;/a&gt;
+
+&lt;/a&gt;&lt;/p&gt;&lt;p&gt;
+
+&lt;a href=https://ugeek.github.io/blog&gt;Visita uGeek - Blog de Tecnología&lt;/a&gt;
+
+&lt;/a&gt;&lt;/p&gt;&lt;p&gt;
+
+&lt;a href=https://ugeek.github.io&gt;Visita uGeek Podcast&lt;/a&gt;
+
+
+&lt;/a&gt;&lt;/p&gt;&lt;p&gt;
+
+&lt;a href=http://feeds.feedburner.com/ugeekblog&gt;Suscribete al Blog de uGeek&lt;/a&gt;
+
+&lt;/a&gt;&lt;/p&gt;&lt;p&gt;
+
+&lt;a href=http://feeds.feedburner.com/ugeek&gt;Suscribete al Podcast de uGeek&lt;/a&gt;
+
+</description>
+    <pubDate>Thu, 27 Dec 2018  +0100</pubDate>
+    <category>unix</category>
+    <category>bash</category>
+    <category>unix</category>
+    <category>terminal</category>
+    <guid>https://ugeek.github.io/blog/post/2018-12-27-eliminar-lineas-en-blanco.html</guid>
+   </item>
+  </channel>
+</rss>

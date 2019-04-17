@@ -1,11 +1,4 @@
-#+TITLE: uGeek - Blog de Tecnología
-#+LINK: https://ugeek.github.io/blog
-#+DESCRIPTION: Blog de Tecnología, Android, GNU Linux, Servidores, y mucho más. Blog vinculado al Blog del Podcast de uGeek
-#+KEYWORDS: GNU, linux, Raspberry, android, domótica 
-#+AUTHOR: Angel
-#+LANGUAGE: es
-#+STARTUP: inlineimages
-* TODO Eliminar líneas en Blanco con sed
+* Eliminar líneas en Blanco con sed
 :PROPERTIES:
 :TITLE: Eliminar líneas en Blanco con sed
 :EXPORT_FILE_NAME: eliminar-lineas-en-blanco

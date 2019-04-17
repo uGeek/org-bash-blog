@@ -1,0 +1,2 @@
+* org-bash-blog
+Build a blog from a single orgmode file with pandoc and all the bash power
