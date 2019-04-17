@@ -21,78 +21,7 @@
 #
 #
 
-
-# BROWSER
-BROWSER="firefox"         # Browser to open page
-EMACS="emacs"             # txt editor
-TWITTER="@ugeekpodcast"   # nick twitter
-LANGUAGE="es_ES"          
-GOOGLE_ANALITYCS="UA-131560140-1"
-
-# RSS
-LOGO_FEED="https://ugeek.github.io/ugeek.png"
-ICON="https://ugeek.github.io/icon/ugeek-256x256.png"
-IMAGE="https://ugeek.github.io/icon/ugeek.png"
-LANGUAGE_RSS="es"
-
-# HEAD PAGE INDEX, LIST, TAG
-HEAD_PAGE=$(echo '
-<link href="'http://fonts.googleapis.com/css?family=Lato'" rel="'stylesheet'" type="'text/css'"/>
-
-<div id="name"><a href="https://ugeek.github.io/"><tt>Blog del Podcast</tt></div></a>
-
-<div id="icon">
-<a href="http://feeds.feedburner.com/uGeek" title="rss" alt="rss"><img src="./icon/podcast.png"  width="25" height="25" alt="podcast"></a>&nbsp;&nbsp;
-<a href="http://feeds.feedburner.com/uGeekBlog" alt="rss"><img src="./icon/rss.png"  width="25" height="25"></a>&nbsp;&nbsp;
-<a href="https://github.com/ugeek"><img src="./icon/github.png"  width="25" height="25" alt="GitHub"></a>&nbsp;&nbsp;
-<a href="https://open.spotify.com/show/1pZRMO6ClMS2jCktwF3I8H" alt="rss"><img src="./icon/spotify.png"  width="25" height="25"></a>&nbsp;&nbsp;
-<a href="https://twitter.com/ugeekpodcast"><img src="./icon/twitter.png"  width="25" height="25" alt="Twitter"></a>&nbsp;&nbsp;
-<a href="https://t.me/uGeek"><img src="./icon/telegram.png"  width="25" height="25" alt="Telegram"></a></div>
-
-<div id="menu">
-<a href="https://ugeek.github.io/blog/list.html"><tt>Artículos</tt></a>&nbsp;&nbsp;
-<a href="https://ugeek.github.io/list.html"><tt>Podcasts</tt></a>&nbsp;&nbsp;
-<a href="https://ugeek.github.io/tags.html"><tt>Tags</tt></a></div>')
-
-# HEAD POST PAGE
-HEAD_PAGE_POST=$(echo '
-<link href="http://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css"/>
-
-<div id="name"><a href="https://ugeek.github.io/"><tt>Blog del Podcast</tt></div></a>
-
-<div id="icon">
-<a href="http://feeds.feedburner.com/uGeek" title="rss" alt="rss"><img src="../icon/podcast.png"  width="25" height="25" alt="podcast"></a>&nbsp;&nbsp;
-<a href="http://feeds.feedburner.com/uGeekBlog" alt="rss"><img src="../icon/rss.png"  width="25" height="25"></a>&nbsp;&nbsp;
-<a href="https://github.com/ugeek"><img src="../icon/github.png"  width="25" height="25" alt="GitHub"></a>&nbsp;&nbsp;
-<a href="https://open.spotify.com/show/1pZRMO6ClMS2jCktwF3I8H" alt="rss"><img src="../icon/spotify.png"  width="25" height="25"></a>&nbsp;&nbsp;
-<a href="https://twitter.com/ugeekpodcast"><img src="../icon/twitter.png"  width="25" height="25" alt="Twitter"></a>&nbsp;&nbsp;
-<a href="https://t.me/uGeek"><img src="../icon/telegram.png"  width="25" height="25" alt="Telegram"></a></div>
-
-<div id="menu">
-<a href="https://ugeek.github.io/blog/list.html"><tt>Artículos</tt></a>&nbsp;&nbsp;
-<a href="https://ugeek.github.io/list.html"><tt>Podcasts</tt></a>&nbsp;&nbsp;
-<a href="https://ugeek.github.io/tags.html"><tt>Tags</tt></a></div>')
-
-# MAIN CONTENT. INDEX PAGE
-INDEX=$(echo "Bienvenido al Blog del Podcast de *uGeek*. Aquí encontraras tutoriales y notas que voy tomando en el proceso de aprendizaje de todo aquello que os explico en el [[https://ugeek.github.io][Podcast]]. En la sección [[https://ugeek.github.io/tags.html][Tags]], encontraras todos los Artículos y Podcast, clasificados por temáticas.")
-
-# MAIN CONTENT. INDEX PAGE
-ULTIMO_TITULO_PODCAST=$(wget -q -O- "http://feeds.feedburner.com/ugeek" | grep '<title>' | head -3 | tail -1 | sed 's/<title>/ /g' | sed 's/<\/title>/ /g')
-ULTIMO_PODCAST=$(wget -q -O- "http://feeds.feedburner.com/ugeek" | grep -o '<enclosure url="[^"]*' | grep -o '[^"]*$' | head -1)
-
-# MAIN CONTENT NEXT. INDEX PAGE
-INDEX_NEXT=$(echo "
-* $ULTIMO_TITULO_PODCAST
-#+HTML: <audio controls=''><source src="$ULTIMO_PODCAST" />Tu navegador no soporta reproductor de Podcast.</audio>")
-
-# FOOTER WEB. ALL PAGES
-PIE_WEB=$(echo '<p style="text-align: center;"><a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license"><img style="border-width: 0px; display: block; margin-left: auto; margin-right: auto;" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Licencia de Creative Commons" /></a><br />Este obra est&aacute; bajo una <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license">licencia de Creative Commons Reconocimiento-NoComercial-CompartirIgual 4.0 Internacional</a>.</p><br><br><br>')
-
-
-#######################################################################################
-#######################################################################################
-#######################################################################################
-
+source config
 if [ $1 = "-h" ]
 then
 echo "
