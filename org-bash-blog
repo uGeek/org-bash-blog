@@ -22,6 +22,7 @@
 #
 
 source config
+TEMP_FILE="$PATH_BLOG.temp"
 if [ $1 = "-h" ]
 then
 echo "
@@ -33,7 +34,7 @@ Modo de empleo:     ./org-bash-blog [ARCHIVO ORG-MODE]
        ./org-bash-blog -b           Construir carpetas
        ./org-bash-blog -n           Nuevo Post
        ./org-bash-blog -f           Crear Nuevo Org-Mode
-
+       ./org-bash-blog -p           Programar Post por fecha y hora
 
 
 Ejemplos:
@@ -41,11 +42,70 @@ Ejemplos:
 ./org-bash-blog -n [ARCHIVO ORG-MODE] 'Título del Artículo'
 ./org-bash-blog -f [ARCHIVO ORG-MODE] 
 
+
+
+Post Programados:
+
+$(crontab -l | grep "org-bash-blog" | grep "^# " | sed -e 's/^.//' | cut -d '#' -f1 )
+
+
+
 "
 else  
 if [ $1 = "-b" ]
 then
-mkdir -p icon css org post images-blog
+mkdir -p icon css org post images-blog .temp $HOME/.config/org-bash-blog/
+else  
+if [ $1 = "-p" ]
+then
+#PROGRAMS_ORG=$2   # add manual program.org
+TODO=$(grep -c "^* TODO" $PROGRAMS_ORG)
+echo "
+Programando $TODO Artículos...
+ "
+grep ":TITLE:"  $PROGRAMS_ORG | cut -d " " -f2- | tail -$TODO > $TEMP_FILE/title
+grep ":EXPORT_DATE:"  $PROGRAMS_ORG | cut -d " " -f2- | tail -$TODO > $TEMP_FILE/date
+grep -n "^* TODO" $PROGRAMS_ORG | cut -d ":" -f1 > $TEMP_FILE/firstlines
+cat $PROGRAMS_ORG  | wc -l >> $TEMP_FILE/firstlines
+while read LINEA; do
+    echo "$LINEA - 1" | bc >> $TEMP_FILE/lastlines
+done < $TEMP_FILE/firstlines
+cat $TEMP_FILE/lastlines | sed '$d' > $TEMP_FILE/temp
+echo $(cat $PROGRAMS_ORG  | wc -l) >> $TEMP_FILE/temp
+cat $TEMP_FILE/firstlines | sed '$d' > $TEMP_FILE/primeralinea
+cat $TEMP_FILE/temp | sed '1d' > $TEMP_FILE/ultimalinea
+paste -d, $TEMP_FILE/primeralinea $TEMP_FILE/ultimalinea $TEMP_FILE/date $TEMP_FILE/title > $TEMP_FILE/program.csv
+echo "######### org-bash-blog #########" > $TEMP_FILE/cron_program
+echo " " >> $TEMP_FILE/cron_program
+rm   "$PATH_SCRIPTS_PROGRAMS"org-bash-blog_program*
+VOL=0
+while read LINEA; do
+    NUM=$(echo "$VOL + 1" | bc )
+    VOL=$NUM
+    LINEAP=$(echo $LINEA | cut -d, -f1)
+    LINEAU=$(echo $LINEA | cut -d, -f2)
+    DIA=$(echo $LINEA | cut -d, -f3)
+    TITLEPROGRAM=$(echo $LINEA | cut -d, -f4-)
+    echo "# $(date -d "$DIA" +'%A %d de %B del %Y a las %H:%Mh') -> $TITLEPROGRAM ## org-bash-blog " >> $TEMP_FILE/cron_program
+    date -d "$DIA" +'%M %H %d %m * bash '$PATH_SCRIPTS_PROGRAMS''org-bash-blog_program$NUM'.sh'  >> $TEMP_FILE/cron_program
+    echo " " >> $TEMP_FILE/cron_program
+    echo "cat "$PROGRAMS_ORG" | sed -n '"$LINEAP","$LINEAU"p;"$LINEAU"q' >> "$BLOG_ORG" "  > $PATH_SCRIPTS_PROGRAMS'org-bash-blog_program'$NUM.sh
+    echo  "sed -i '"$LINEAP","$LINEAU"d' "$PROGRAMS_ORG"" >> $PATH_SCRIPTS_PROGRAMS'org-bash-blog_program'$NUM.sh
+    echo  "cd $PATH_BLOG  ; $ORG_BASH_BLOG $BLOG_ORG" >> $PATH_SCRIPTS_PROGRAMS'org-bash-blog_program'$NUM.sh
+    echo  "rm   $PATH_SCRIPTS_PROGRAMS'org-bash-blog_program'$NUM.sh" >>  $PATH_SCRIPTS_PROGRAMS'org-bash-blog_program'$NUM.sh
+    echo "Artículo: Nº$NUM  
+Título:   $TITLEPROGRAM   
+Fecha:    $(date -d "$DIA" +'%A %d de %B del %Y a las %H:%Mh')
+ "
+done < $TEMP_FILE/program.csv
+echo "######### org-bash-blog #########" >> $TEMP_FILE/cron_program
+rm  $TEMP_FILE/date  $TEMP_FILE/firstlines  $TEMP_FILE/lastlines  $TEMP_FILE/primeralinea  $TEMP_FILE/temp  $TEMP_FILE/ultimalinea $TEMP_FILE/program.csv  $TEMP_FILE/title
+crontab -l > $TEMP_FILE/my_cron
+sed -i '/org-bash-blog/d' $TEMP_FILE/my_cron
+sed -i '/^ *$/d' $TEMP_FILE/my_cron
+cat $TEMP_FILE/cron_program >> $TEMP_FILE/my_cron
+crontab $TEMP_FILE/my_cron
+rm $TEMP_FILE/my_cron $TEMP_FILE/cron_program
 else  
 if [ $1 = "-n" ]
 then
@@ -588,6 +648,7 @@ rm tag.csv tags.csv tag temp_post.org
 rm category.csv hour image
 rm title link description category date date-  
 sed -i '$d' $1
+fi
 fi
 fi
 fi

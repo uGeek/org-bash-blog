@@ -64,3 +64,21 @@ INDEX_NEXT=$(echo "
 # FOOTER WEB. ALL PAGES
 PIE_WEB=$(echo '<p style="text-align: center;"><a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license"><img style="border-width: 0px; display: block; margin-left: auto; margin-right: auto;" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Licencia de Creative Commons" /></a><br />Este obra est&aacute; bajo una <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license">licencia de Creative Commons Reconocimiento-NoComercial-CompartirIgual 4.0 Internacional</a>.</p><br><br><br>')
 
+
+
+
+#################################################################################################################
+#POST PUBLICATION PROGRAMMING
+#################################################################################################################
+
+# POST PROGRAM SCHEDULE
+PROGRAMS_ORG="$HOME/blog/program.org"
+
+# BLOG FILE
+BLOG_ORG="$HOME/blog/blog.org"
+# BLOG FOLDER
+PATH_BLOG="$HOME/blog/"
+# ORG-BASH-BLOG 
+ORG_BASH_BLOG="/usr/bin/org-bash-blog"
+# CONFIG FILES
+PATH_SCRIPTS_PROGRAMS="$HOME/.config/org-bash-blog/"
