@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# <org-bash-blog v5 . Build a blog from a single orgmode file with pandoc and all the bash power>
+# <org-bash-blog v5.2 . Build a blog from a single orgmode file with pandoc and all the bash power>
 #
 # Copyright (C) 2019 Angel. uGeek
 # ugeekpodcast@gmail.com
