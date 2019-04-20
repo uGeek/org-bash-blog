@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# <org-bash-blog v5.2 . Build a blog from a single orgmode file with pandoc and all the bash power>
+# <org-bash-blog v5.2.1 . Build a blog from a single orgmode file with pandoc and all the bash power>
 #
 # Copyright (C) 2019 Angel. uGeek
 # ugeekpodcast@gmail.com
@@ -149,7 +149,7 @@ grep ":TAG:" $1 | cut -d " " -f2- | tr -d ' ' | sed "s|$|,,,,,,,,,|" | cut -d, -
 grep ":IMAGE:" $1 | cut -d " " -f2- | tr -d ' ' > image
 cat date- |  tr -d '-' > date
 paste -d, date title link description date- category tag hour image > postsID.csv
-cat postsID.csv | sort -r | cut -d, -f2- > posts.csv
+cat postsID.csv | sort -t "," -k1,1r -k17,17r | cut -d, -f2- > posts.csv
 cat postsID.csv | sort | cut -d, -f2- > posts4feed.csv
 cat posts.csv | cut -d "," -f5 | sed '/^ *$/d' | uniq | sort > category.csv
 cat tag | cut -d "," -f1 > tags.csv
@@ -643,7 +643,7 @@ else
 echo "No hay ningun Post con estado TODO"
 fi
 rm posts.csv emacs.csv
-rm  posts4feed.csv postsID.csv 
+rm  posts4feed.csv #postsID.csv 
 rm tag.csv tags.csv tag temp_post.org
 rm category.csv hour image
 rm title link description category date date-  
