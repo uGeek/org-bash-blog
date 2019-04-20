@@ -1,2 +1,32 @@
 * org-bash-blog
 Build a blog from a single orgmode file with pandoc and all the bash power
+
+** Install Org-bash-blog
+
+#+BEGIN_SRC 
+sudo wget -O /usr/bin/org-bash-blog https://raw.githubusercontent.com/uGeek/org-bash-blog/master/org-bash-blog
+#+END_SRC
+
+#+BEGIN_SRC 
+sudo chmod +x /usr/bin/org-bash-blog
+#+END_SRC
+
+*** Install Pandoc
+
+Ubuntu, Debian, Raspbian...
+#+BEGIN_SRC 
+sudo apt install pandoc
+#+END_SRC
+
+** Help
+
+#+BEGIN_SRC 
+org-bash-blog -h
+#+END_SRC
+
+
+
+
+Angel
+https://ugeek.github.io
+ugeekpodcast@gmail.com
