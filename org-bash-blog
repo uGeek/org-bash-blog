@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# <org-bash-blog v5.2.2 . Build a blog from a single orgmode file with pandoc and all the bash power>
+# <org-bash-blog v5.2.1 . Build a blog from a single orgmode file with pandoc and all the bash power>
 #
 # Copyright (C) 2019 Angel. uGeek
 # ugeekpodcast@gmail.com
@@ -35,14 +35,12 @@ Modo de empleo:     ./org-bash-blog [ARCHIVO ORG-MODE]
        ./org-bash-blog -n           Nuevo Post
        ./org-bash-blog -f           Crear Nuevo Org-Mode
        ./org-bash-blog -p           Programar Post por fecha y hora
-       ./org-bash-blog -w           Previsualizar Post programados
 
 
 Ejemplos:
 
 ./org-bash-blog -n [ARCHIVO ORG-MODE] 'Título del Artículo'
 ./org-bash-blog -f [ARCHIVO ORG-MODE] 
-./org-bash-blog -w [ARCHIVO ORG-MODE]  
 
 
 
@@ -56,182 +54,7 @@ $(crontab -l | grep "org-bash-blog" | grep "^# " | sed -e 's/^.//' | cut -d '#' 
 else  
 if [ $1 = "-b" ]
 then
-mkdir -p icon css org post images-blog program .temp $HOME/.config/org-bash-blog/
-else  
-
-
-if [ $1 = "-w" ]
-then
-TITLE=$(grep "#+TITLE:" $2 | cut -d " " -f2-)
-LINK=$(grep "#+LINK:" $2 | cut -d " " -f2-)
-DESCRIPTION=$(grep "#+DESCRIPTION:" $2 | cut -d " " -f2-)
-AUTHOR=$(grep "#+AUTHOR:" $2 | cut -d " " -f2-)
-grep ":TITLE:" $2 | cut -d " " -f2- | sed 's/,/|/g' > title
-grep ":EXPORT_FILE_NAME:" $2 | cut -d " " -f2- | sed 's/ /-/g' | awk '{print tolower($0)}' > link
-grep ":DESCRIPTION:" $2 | cut -d " " -f2- | sed 's/,/|/g'> description 
-grep ":EXPORT_DATE:"  $2 | cut -d " " -f2 > date-
-grep ":EXPORT_DATE:"  $2 | cut -d " " -f3 > hour
-grep ":CATEGORY:"  $2 | cut -d " " -f2- > category
-grep ":TAG:" $2 | cut -d " " -f2- | tr -d ' ' | sed "s|$|,,,,,,,,,|" | cut -d, -f -10 > tag
-grep ":IMAGE:" $2 | cut -d " " -f2- | tr -d ' ' > image
-cat date- |  tr -d '-' > date
-paste -d, date title link description date- category tag hour image > postsID.csv
-cat postsID.csv | sort -t "," -k1,1r -k17,17r | cut -d, -f2- > posts.csv
-cat postsID.csv | sort | cut -d, -f2- > posts4feed.csv
-cat posts.csv | cut -d "," -f5 | sed '/^ *$/d' | uniq | sort > category.csv
-cat tag | cut -d "," -f1 > tags.csv
-cat tag | cut -d "," -f2 >> tags.csv 
-cat tag | cut -d "," -f3 >> tags.csv
-cat tag | cut -d "," -f4 >> tags.csv
-cat tag | cut -d "," -f5 >> tags.csv
-cat tag | cut -d "," -f6 >> tags.csv
-cat tag | cut -d "," -f7 >> tags.csv
-cat tag | cut -d "," -f8 >> tags.csv
-cat tag | cut -d "," -f9 >> tags.csv
-cat tag | cut -d "," -f10 >> tags.csv
-cat tags.csv | sed '/^ *$/d' | sort | uniq > tag.csv
-echo " " >> $2
-NUM_POSTS=$(cat posts.csv |  wc -l)
-TODO=$(grep -irq "^* TODO" $2)
-if [ $? -eq 0 ]; then
-clear
-echo ">>> org-bash-blog va Generar los Post para su previsualización <<<"
-grep -n "^* TODO" $2 |  cut -d ":" -f1 > TODO.txt
-LINES_BLOG=$(cat $2  | wc -l)
-cat $2  | wc -l >> TODO.txt
-echo "Hay $NUM_POSTS Artículos y $LINES_BLOG líneas en $2"
-echo "Los Artículos para su previsualización están en la carpeta: $PWD
-"
-ONE_LINE=$(cat TODO.txt | head -1)
-sed -i '1d' TODO.txt
-while read TWO_LINE; do
-LAST_LINE=$(($TWO_LINE - 1))
-CATEGORY=$(cat $2 | sed -n  "$ONE_LINE,$LAST_LINE"p | sed 's/* TODO/*/g' | grep ":CATEGORY:"  | cut -d " " -f2)
-cat $2 | sed -n  "$ONE_LINE,$LAST_LINE"p | sed 's/* TODO/*/g' > temp_post.org
-ONE_LINE=$(echo $TWO_LINE)
-PUB=$(expr $PUB + 1)
-echo "Generando Artículo Nº $PUB     $(grep ":TITLE:" temp_post.org | cut -d " " -f2-)"
-FILE_DATE=$(grep ":EXPORT_DATE:" temp_post.org | cut -d " " -f2)
-DATE_MOD=$(grep ":EXPORT_DATE:" temp_post.org | cut -d " " -f4)
-if [ -n "$DATE_MOD" ];
-then
-    echo "               ***** Artículo Modificado *****"
-    UPDATE=$(echo " y *actualizado* el $(date -d"$DATE_MOD" +'%A %d %B del %Y')")
-fi
-echo "#+HTML: <br>" >> temp_post.org
-echo "Publicado por $AUTHOR el $(date -d"$FILE_DATE" +'%A %d %B del %Y') $UPDATE" >> temp_post.org
-UPDATE=$(echo " ")
-echo "#+HTML: <br><br> " >> temp_post.org
-echo "También te puede interesar:
- "  >> temp_post.org
-CATEGORY=$(grep ":CATEGORY:" temp_post.org | cut -d " " -f2)
-grep -i $CATEGORY posts.csv | sed '1d' > category_temp_post.csv
-cat category_temp_post.csv | head -n10 > cat_temp.csv
-cp cat_temp.csv category_temp_post.csv
-while read LINEA; do  
-OTHERSTITLE=$(echo $LINEA | cut -d, -f1 | sed 's/|/,/g')
-OTHERSLINKS=$(echo $LINEA | cut -d, -f2)
-OTHERSDATE=$(echo  $LINEA | cut -d, -f4)
-echo "- [[$LINK/post/$OTHERSDATE-$OTHERSLINKS.html][$OTHERSTITLE]]" >> temp_post.org
-done < category_temp_post.csv
-FILE_TITLE=$(grep ":TITLE:" temp_post.org | cut -d " " -f2- | sed 's/|/,/g')
-FILE_NAME=$(grep ":EXPORT_FILE_NAME:" temp_post.org | cut -d " " -f2- |awk '{print tolower($0)}' |  sed 's/ /-/g')
-FILE_DATE=$(grep ":EXPORT_DATE:" temp_post.org | cut -d " " -f2)
-FILE_IMAGE=$(grep ":IMAGE:" temp_post.org  | cut -d " " -f2- | sed 's|./images-blog/||g' | sed 's/ //g' )
-FILE=$(echo "$FILE_DATE-$FILE_NAME")
-FILE_DESCRIPTION=$(grep ":DESCRIPTION:" temp_post.org | cut -d " " -f2-)
-DESCRIPTION_P=$(echo $FILE_DESCRIPTION | sed 's/|/,/g')
-sed -i "1i #+DESCRIPTION: $DESCRIPTION_P" temp_post.org
-FILE_TAG=$(grep ":TAG:" temp_post.org | cut -d " " -f2-)
-TAG=$(echo $FILE_TAG | sed 's/|/,/g')
-sed -i "1i #+KEYWORDS: $TAG" temp_post.org
-echo "#+TITLE: $FILE_TITLE" > $FILE.org
-cat temp_post.org >> $FILE.org
-echo '<head>
-<title>'$FILE_TITLE'. '$TITLE'</title>
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<div id="logo"><a href="https://ugeek.github.io"><img src="../icon/ugeek.png" border="0"  width="90" height="90" alt="uGeek"></a></div>
-<link rel="stylesheet" type="text/css" href="../css/stylesheet.css" />
-<link rel="alternate" type="application/rss+xml" href="'$LINK'/feed.xml" title="uGeek - Blog de Tecnología">
-
-<link rel="shortcut icon" href="'$LINK$ICON'" type="image/x-icon" />
-<link rel="icon" href="'$LINK$ICON'" sizes="32x32" />
-<link rel="icon" href="'$LINK$ICON'" sizes="192x192" />
-<link rel="apple-touch-icon-precomposed" href="'$LINK$ICON'" />
-<meta property="og:locale" content="'$LANGUAGE'" />
-
-
-
-<meta name="robots" content="index, follow">
-<meta name="twitter:site" content="'$TWITTER'" />
-<meta name="twitter:card" content="summary_large_image" />
-<link rel="alternate" type="application/rss+xml" title="uGeek. Blog de Tecnología" href="'$LINK'/feed/" />
-
-
-<meta name="author" content="'$AUTHOR'">
-<meta name="description" content="'$FILE_DESCRIPTION'" />
-
-
-<meta property="og:site_name" content="'$TITLE'"/>
-<meta property="og:type" content="article" /> 
-<meta property="og:title" content="'$FILE_TITLE'" />
-<meta property="og:description" content="'$FILE_DESCRIPTION'" />
-<meta property="og:image" content="'$LINK'/images-blog/'$FILE_IMAGE'" />
-<meta property="og:url" content="'$LINK'/post/'$FILE'.html" />
-
-<meta name="twitter:title" content="'$FILE_TITLE'" />
-<meta name="twitter:description" content="'$FILE_DESCRIPTION'" />
-<meta name="twitter:image" content="'$LINK'/images-blog/'$FILE_IMAGE'" />
-
-
-<link rel="stylesheet" type="text/css" href="css/stylesheet.css" /><link rel="alternate" type="application/rss+xml" href="https://ugeek.github.io/feed.xml" title="uGeek - Blog de Tecnología">
-
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id='$GOOGLE_ANALITYCS'"></script>
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag("'js'", new Date())
-gtag("'config'", "'$GOOGLE_ANALITYCS'");
-</script>
-
-</head>
-
-<br><br><br><br><br><br><br><br><br>
-
-'$HEAD_PAGE_POST'
-' >   $FILE.html
-cat $FILE.org | pandoc --from org --to html5 >> $FILE.html
-ORG=$(echo '<br><br><br><p style="text-align: center;">Powered by <a href="https://github.com/ugeek/org-bash-blog" target="_blank" rel="noopener">org-bash-blog</a></p><p style="text-align: center;">Writing in orgmode whith emacs</p>')
-echo $ORG $PIE_WEB  >> $FILE.html
-rm $FILE.org
-sed -i 's|src="./images-blog/|src="../images-blog/|g' $FILE.html
-sed -i 's|__icon/|../icon/|g' $FILE.html
-sed -i 's|href="__css/|href="..css/|g' $FILE.html
-sed -i 's|href="index.html"|href="../index.html"|g' $FILE.html
-sed -i 's|href="list.html"|./href="../list.html"|g' $FILE.html
-sed -i 's|href="tag.html"|./href="../tag.html"|g' $FILE.html
-done < TODO.txt
-rm TODO.txt
-echo '<html>
-<html lang="es"><head><meta charset="utf-8"><meta name="robots" content="noindex">
-<title>org-bash-blog. Index</title>
-<link rel="stylesheet" type="text/css" href="../css/stylesheet.css" />
-</head>
-<body>
-<h1>Org-bash-blog v 5.0</h1>
-<h3>Indice de todas las páginas creadas en tu repositorio</h3>
-<h5>'$(find . -type f | grep .html | wc -l)' archivos .html</h5>
-<h5>' > org-bash-blog.html
-find . -type f | grep .html | sed -r 's/(.*)/\<a href="\1" target="_blank" rel="noopener">\1\<\/a\><br>/' | sort -r >> org-bash-blog.html
-$BROWSER org-bash-blog.html 
-$BROWSER "$FILE.html" 
-rm posts.csv cat_temp.csv 
-rm posts4feed.csv postsID.csv category_temp_post.csv
-rm tag.csv tags.csv tag temp_post.org
-rm category.csv hour image
-rm title link description category date date-  
+mkdir -p icon css org post images-blog .temp $HOME/.config/org-bash-blog/
 else  
 if [ $1 = "-p" ]
 then
@@ -820,13 +643,11 @@ else
 echo "No hay ningun Post con estado TODO"
 fi
 rm posts.csv emacs.csv
-rm  posts4feed.csv postsID.csv 
+rm  posts4feed.csv #postsID.csv 
 rm tag.csv tags.csv tag temp_post.org
 rm category.csv hour image
 rm title link description category date date-  
 sed -i '$d' $1
-fi
-fi
 fi
 fi
 fi
