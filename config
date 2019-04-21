@@ -11,6 +11,15 @@ ICON="https://ugeek.github.io/icon/ugeek-256x256.png"
 IMAGE="https://ugeek.github.io/icon/ugeek.png"
 LANGUAGE_RSS="es"
 
+# HEAD PAGE PREVIEW
+HEAD=$(echo '<head>
+<title>$TITLEPROGRAM</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<div id="logo"><a href="https://ugeek.github.io"><img src="../icon/ugeek.png" border="0"  width="90" height="90" alt="uGeek"></a></div>
+<link rel="stylesheet" type="text/css" href="../css/stylesheet.css" /><br><br><br><br><br><br><br><br><br>
+')
+
 # HEAD PAGE INDEX, LIST, TAG
 HEAD_PAGE=$(echo '
 <link href="'http://fonts.googleapis.com/css?family=Lato'" rel="'stylesheet'" type="'text/css'"/>

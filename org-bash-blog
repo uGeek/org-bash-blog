@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# <org-bash-blog v5.2.1 . Build a blog from a single orgmode file with pandoc and all the bash power>
+# <org-bash-blog v5.2.2 . Build a blog from a single orgmode file with pandoc and all the bash power>
 #
 # Copyright (C) 2019 Angel. uGeek
 # ugeekpodcast@gmail.com
@@ -23,6 +23,63 @@
 
 source config
 TEMP_FILE="$PATH_BLOG.temp"
+if [ $1 = "-w" ]
+then
+echo "Previsualizando... "
+PROGRAMS_ORG=$2   # add manual program.org
+TODO=$(grep -c "^* TODO" $PROGRAMS_ORG)
+echo "
+Programando $TODO Artículos...
+ "
+grep ":TITLE:"  $PROGRAMS_ORG | cut -d " " -f2- | tail -$TODO > $TEMP_FILE/title
+grep ":EXPORT_DATE:"  $PROGRAMS_ORG | cut -d " " -f2- | tail -$TODO > $TEMP_FILE/date
+grep -n "^* TODO" $PROGRAMS_ORG | cut -d ":" -f1 > $TEMP_FILE/firstlines
+cat $PROGRAMS_ORG  | wc -l >> $TEMP_FILE/firstlines
+rm *.html
+while read LINEA; do
+    echo "$LINEA - 1" | bc >> $TEMP_FILE/lastlines
+done < $TEMP_FILE/firstlines
+cat $TEMP_FILE/lastlines | sed '$d' > $TEMP_FILE/temp
+echo $(cat $PROGRAMS_ORG  | wc -l) >> $TEMP_FILE/temp
+cat $TEMP_FILE/firstlines | sed '$d' > $TEMP_FILE/primeralinea
+cat $TEMP_FILE/temp | sed '1d' > $TEMP_FILE/ultimalinea
+paste -d, $TEMP_FILE/primeralinea $TEMP_FILE/ultimalinea $TEMP_FILE/date $TEMP_FILE/title > $TEMP_FILE/program.csv
+VOL=0
+while read LINEA; do
+    NUM=$(echo "$VOL + 1" | bc )
+    VOL=$NUM
+    LINEAP=$(echo $LINEA | cut -d, -f1)
+    LINEAU=$(echo $LINEA | cut -d, -f2)
+    DIA=$(echo $LINEA | cut -d, -f3)
+    TITLEPROGRAM=$(echo $LINEA | cut -d, -f4- | sed -e 's/^[ \t]*//; s/[ \t]*$//; /^$/d')
+    TITLE_FILE=$(echo $TITLEPROGRAM | sed -e 's/ /-/g'  ) 
+    sed -n "$LINEAP,$LINEAU"p   $PROGRAMS_ORG  > $TITLE_FILE.org
+    echo $HEAD > $TITLE_FILE.html
+    echo $HEAD_PAGE_POST >>  $TITLE_FILE.html
+    cat $TITLE_FILE.org | pandoc --from org --to html5 >> $TITLE_FILE.html
+    sed -i 's|src="./images-blog/|src="../images-blog/|g' $TITLE_FILE.html
+    rm $TITLE_FILE.org
+    echo $PIE_WEB >> $TITLE_FILE.html
+done < $TEMP_FILE/program.csv
+echo '<head>
+<title></title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" type="text/css" href="../css/stylesheet.css" />
+<html lang="es"><head><meta charset="utf-8"><meta name="robots" content="noindex">
+<title>org-bash-blog. Index</title>
+</head>
+<body>
+<h1>Org-bash-blog v 5.2.2</h1>
+<h3>Indice de todas las páginas creadas en tu repositorio</h3>
+<h5>'$(find . -type f | grep .html | wc -l)' archivos .html</h5>
+<h5>' > org-bash-blog.html
+find . -type f | grep .html | sed -r 's/(.*)/\<a href="\1" target="_blank" rel="noopener">\1\<\/a\><br>/' | sort -r >> org-bash-blog.html
+$BROWSER org-bash-blog.html 
+$BROWSER "$TITLE_FILE.html" 
+#rm $TEMP_FILE/program.csv
+rm  $TEMP_FILE/date  $TEMP_FILE/firstlines  $TEMP_FILE/lastlines  $TEMP_FILE/primeralinea  $TEMP_FILE/temp  $TEMP_FILE/ultimalinea $TEMP_FILE/program.csv  $TEMP_FILE/title
+else
 if [ $1 = "-h" ]
 then
 echo "
@@ -35,12 +92,14 @@ Modo de empleo:     ./org-bash-blog [ARCHIVO ORG-MODE]
        ./org-bash-blog -n           Nuevo Post
        ./org-bash-blog -f           Crear Nuevo Org-Mode
        ./org-bash-blog -p           Programar Post por fecha y hora
+       ./org-bash-blog -w           Previsualizar Post programados
 
 
 Ejemplos:
 
 ./org-bash-blog -n [ARCHIVO ORG-MODE] 'Título del Artículo'
 ./org-bash-blog -f [ARCHIVO ORG-MODE] 
+./org-bash-blog -w [ARCHIVO ORG-MODE] 
 
 
 
@@ -54,7 +113,7 @@ $(crontab -l | grep "org-bash-blog" | grep "^# " | sed -e 's/^.//' | cut -d '#' 
 else  
 if [ $1 = "-b" ]
 then
-mkdir -p icon css org post images-blog .temp $HOME/.config/org-bash-blog/
+mkdir -p icon css org post images-blog .temp $HOME/.config/org-bash-blog/ program/
 else  
 if [ $1 = "-p" ]
 then
@@ -85,7 +144,7 @@ while read LINEA; do
     LINEAP=$(echo $LINEA | cut -d, -f1)
     LINEAU=$(echo $LINEA | cut -d, -f2)
     DIA=$(echo $LINEA | cut -d, -f3)
-    TITLEPROGRAM=$(echo $LINEA | cut -d, -f4-)
+    TITLEPROGRAM=$(echo $LINEA | cut -d, -f4- | sed -e 's/^[ \t]*//; s/[ \t]*$//; /^$/d')
     echo "# $(date -d "$DIA" +'%A %d de %B del %Y a las %H:%Mh') -> $TITLEPROGRAM ## org-bash-blog " >> $TEMP_FILE/cron_program
     date -d "$DIA" +'%M %H %d %m * bash '$PATH_SCRIPTS_PROGRAMS''org-bash-blog_program$NUM'.sh'  >> $TEMP_FILE/cron_program
     echo " " >> $TEMP_FILE/cron_program
@@ -139,12 +198,12 @@ TITLE=$(grep "#+TITLE:" $1 | cut -d " " -f2-)
 LINK=$(grep "#+LINK:" $1 | cut -d " " -f2-)
 DESCRIPTION=$(grep "#+DESCRIPTION:" $1 | cut -d " " -f2-)
 AUTHOR=$(grep "#+AUTHOR:" $1 | cut -d " " -f2-)
-grep ":TITLE:" $1 | cut -d " " -f2- | sed 's/,/|/g' > title
-grep ":EXPORT_FILE_NAME:" $1 | cut -d " " -f2- | sed 's/ /-/g' | awk '{print tolower($0)}' > link
+grep ":TITLE:" $1 | cut -d " " -f2- | sed 's/,/|/g' | sed 's/^[ \t]*//; s/[ \t]*$//; /^$/d' > title
+grep ":EXPORT_FILE_NAME:" $1 | cut -d " " -f2- | awk '{print tolower($0)}' | sed 's/^[ \t]*//; s/[ \t]*$//; /^$/d' | sed 's/ /-/g' > link
 grep ":DESCRIPTION:" $1 | cut -d " " -f2- | sed 's/,/|/g'> description 
-grep ":EXPORT_DATE:"  $1 | cut -d " " -f2 > date-
-grep ":EXPORT_DATE:"  $1 | cut -d " " -f3 > hour
-grep ":CATEGORY:"  $1 | cut -d " " -f2- > category
+grep ":EXPORT_DATE:"  $1 | cut -d " " -f2 | sed 's/^[ \t]*//; s/[ \t]*$//; /^$/d' > date-
+grep ":EXPORT_DATE:"  $1 | cut -d " " -f3 | sed 's/^[ \t]*//; s/[ \t]*$//; /^$/d' > hour
+grep ":CATEGORY:"  $1 | cut -d " " -f2- | sed 's/^[ \t]*//; s/[ \t]*$//; /^$/d' > category
 grep ":TAG:" $1 | cut -d " " -f2- | tr -d ' ' | sed "s|$|,,,,,,,,,|" | cut -d, -f -10 > tag
 grep ":IMAGE:" $1 | cut -d " " -f2- | tr -d ' ' > image
 cat date- |  tr -d '-' > date
@@ -640,10 +699,10 @@ sed -i 's|__css/|css/|g' tag.html
 rm tag.org category_temp_post.csv cat_temp.csv
 rm *~ > /dev/null 2>&1
 else
-echo "No hay ningun Post con estado TODO"
+echo " "
 fi
 rm posts.csv emacs.csv
-rm  posts4feed.csv #postsID.csv 
+rm  posts4feed.csv postsID.csv 
 rm tag.csv tags.csv tag temp_post.org
 rm category.csv hour image
 rm title link description category date date-  
@@ -653,3 +712,4 @@ fi
 fi
 fi
 fi
+fi    
