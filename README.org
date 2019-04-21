@@ -2,8 +2,10 @@
 Build a blog from a single orgmode file with pandoc and all the bash power
 
 ** Install Org-bash-blog
-*** Install on your server
+
 There are two ways to use:
+
+*** Install on your server
 
 #+BEGIN_SRC 
 sudo wget -O /usr/bin/org-bash-blog https://raw.githubusercontent.com/uGeek/org-bash-blog/master/org-bash-blog
