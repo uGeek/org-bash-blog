@@ -85,9 +85,15 @@ PROGRAMS_ORG="$HOME/blog/program.org"
 
 # BLOG FILE
 BLOG_ORG="$HOME/blog/blog.org"
+
 # BLOG FOLDER
 PATH_BLOG="$HOME/blog/"
+
 # ORG-BASH-BLOG 
 ORG_BASH_BLOG="/usr/bin/org-bash-blog"
+
 # CONFIG FILES
 PATH_SCRIPTS_PROGRAMS="$HOME/.config/org-bash-blog/"
+
+# PUBLISH METHOD (Put the method of publication you use. Here is a post using git. If you don't want to post, don't put anything) 
+PUBLISH="git add $PATH_BLOG . ; git commit -m 'publish post' ; git push"
