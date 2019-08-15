@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# <org-bash-blog v5.2.2 . Build a blog from a single orgmode file with pandoc and all the bash power>
+# <org-bash-blog v5.2.3 . Build a blog from a single orgmode file with pandoc and all the bash power>
 #
 # Copyright (C) 2019 Angel. uGeek
 # ugeekpodcast@gmail.com
@@ -151,6 +151,7 @@ while read LINEA; do
     echo "cat "$PROGRAMS_ORG" | sed -n '"$LINEAP","$LINEAU"p;"$LINEAU"q' >> "$BLOG_ORG" "  > $PATH_SCRIPTS_PROGRAMS'org-bash-blog_program'$NUM.sh
     echo  "sed -i '"$LINEAP","$LINEAU"d' "$PROGRAMS_ORG"" >> $PATH_SCRIPTS_PROGRAMS'org-bash-blog_program'$NUM.sh
     echo  "cd $PATH_BLOG  ; $ORG_BASH_BLOG $BLOG_ORG" >> $PATH_SCRIPTS_PROGRAMS'org-bash-blog_program'$NUM.sh
+    echo  $PUBLISH >>  $PATH_SCRIPTS_PROGRAMS'org-bash-blog_program'$NUM.sh
     echo  "rm   $PATH_SCRIPTS_PROGRAMS'org-bash-blog_program'$NUM.sh" >>  $PATH_SCRIPTS_PROGRAMS'org-bash-blog_program'$NUM.sh
     echo "Artículo: Nº$NUM  
 Título:   $TITLEPROGRAM   
