@@ -96,4 +96,4 @@ ORG_BASH_BLOG="/usr/bin/org-bash-blog"
 PATH_SCRIPTS_PROGRAMS="$HOME/.config/org-bash-blog/"
 
 # PUBLISH METHOD (Put the method of publication you use. Here is a post using git. If you don't want to post, don't put anything) 
-PUBLISH="git add $PATH_BLOG . ; git commit -m 'publish post' ; git push"
+PUBLISH="git add $PATH_BLOG . ; git commit -m 'publish post' ; git push ; curl -X POST https://api.telegram.org/bot<TOKEN>/sendMessage\?chat_id\=<YOUR ID>\&text\='Publicado Nuevo Post'"
