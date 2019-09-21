@@ -81,7 +81,10 @@ PIE_WEB=$(echo '<p style="text-align: center;"><a href="http://creativecommons.o
 #################################################################################################################
 
 # POST PROGRAM SCHEDULE
-PROGRAMS_ORG="$HOME/blog/program.org"
+PROGRAMS_ORG="$HOME/blog/program/program.org"
+
+# DRAFT POST                                                                                                                                
+PROGRAMS_ORG="$HOME/blog/program/draft.org"
 
 # BLOG FILE
 BLOG_ORG="$HOME/blog/blog.org"
