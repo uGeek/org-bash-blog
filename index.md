@@ -1,45 +1,45 @@
 
-** Install Org-bash-blog
+## Install Org-bash-blog
 
 There are two ways to use:
 
-*** Install on your server
+### Install on your server
 
-#+BEGIN_SRC 
+``` 
 sudo wget -O /usr/bin/org-bash-blog https://raw.githubusercontent.com/uGeek/org-bash-blog/master/org-bash-blog
-#+END_SRC
+```
 
-#+BEGIN_SRC 
+``` 
 sudo chmod +x /usr/bin/org-bash-blog
-#+END_SRC
+```
 
 Go to the root folder of the website and copy the config file:
 
-#+BEGIN_SRC 
+``` 
 wget https://raw.githubusercontent.com/uGeek/org-bash-blog/master/config
-#+END_SRC
+```
 
 Now, change the default values and put yours
 
 
-*** Clone the repository:
+## Clone the repository:
 
-#+BEGIN_SRC 
+``` 
 git clone git@github.com:uGeek/org-bash-blog.git 
-#+END_SRC
+```
 
-*** Install Pandoc
+## Install Pandoc
 
 Ubuntu, Debian, Raspbian...
-#+BEGIN_SRC 
+``` 
 sudo apt install pandoc
-#+END_SRC
+```
 
-** Help
+## Help
 
-#+BEGIN_SRC 
+``` 
 org-bash-blog -h
-#+END_SRC
+```
 
 
 
