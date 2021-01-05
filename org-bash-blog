@@ -201,7 +201,8 @@ then
 fi
 if [ $1 = "-i" ] 
 then
-clear    
+clear 
+sed -i "s|source config|source $PWD/config|g" org-bash-blog 
 cp org-bash-blog /usr/bin/
 chmod +x /usr/bin/org-bash-blog
 echo "Instalado Org-Bash-Blog"
