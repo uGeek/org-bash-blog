@@ -20,13 +20,244 @@
 #
 #
 #
-
+VERSION="v5.9.5 05/01/21"
+#
 source config
+#
+#
+#
 TEMP_FILE="$PATH_BLOG.temp"
-if [ $1 = "-w" ]
+if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "" ] || [ "$1" = "h" ]  
 then
+echo "
+
+Modo de empleo:     org-bash-blog [ARCHIVO ORG-MODE] 
+
+       Comando                    Significado
+       org-bash-blog -n           Nuevo post en draft.org
+       org-bash-blog -nim         Nuevo post importado de markdown a draft.org
+       org-bash-blog -d           Pasar todos los Artículos en estado PROGRAM, a program.org 
+       org-bash-blog -w           Previsualizar Post programados
+       org-bash-blog -p           Programar Post por fecha y hora, de program.org
+       org-bash-blog -ii          Descargar Imagen desde internet o un servidor
+       org-bash-blog -cal         Previsualizar Post programados en calcurse
+
+       org-bash-blog  blog        Abrir blog.org con emacs
+       org-bash-blog  draft       Abrir draft.org con emacs
+       org-bash-blog  program     Abrir program.org con emacs
+       org-bash-blog  blogt       Abrir blog.org con emacs versión terminal
+       org-bash-blog  draftt      Abrir draft.org con emacs versión terminal
+       org-bash-blog  programt    Abrir program.org con emacs versión terminal    
+
+       org-bash-blog  -g          Publicar en git  
+
+       org-bash-blog -i           Instalar org-bash-blog en tu pc. Situate donde esta el script y ejecuta: ./org-bash-blog -i              
+       org-bash-blog -b           Construir carpetas
+       org-bash-blog -f           Crear Nuevo Org-Mode
+       org-bash-blog -ia          Añadir a tu sistema los alias blog y program
+       org-bash-blog -h           Ayuda y ver Posts programados
+
+
+
+Ejemplos:
+
+- Asistente para crear nuevo artículo en draft.org:
+   org-bash-blog -n 
+
+- Asistente para crear artículo, importado de un archivo markdown:
+    org-bash-blog -nim archivo.md
+
+- Importar de draft.org a program.org, todos los artículos en estado PROGRAM:
+    org-bash-blog -d
+
+- Previsualizar e importar del archivo orgmode, las línas de descripción del artículo
+  para el feed.
+   org-bash-blog -w program.org
+
+- Programar todos los articulos de program.org
+    org-bash-blog -p
+
+Otros: 
+ Crea un  nuevo archivo orgmode para el blog
+  org-bash-blog -f [ARCHIVO ORG-MODE] 
+
+
+Post Programados:
+
+$(crontab -l | grep "org-bash-blog" | grep "^# " | sed -e 's/^.//' | cut -d '#' -f1 | sort -k2 )
+
+
+org-bash-blog 
+"$VERSION"
+"
+exit
+fi
+if [ "$1" = "-ii" ]
+then
+echo "Nombre de la imágen"
+read NOMBRE
+echo "Escribe la url"
+read URL
+wget -O $PATH_BLOG/images-blog/$NOMBRE $URL
+echo "#+HTML: <center>"  >> $PATH_BLOG/program/draft.org
+echo "[[./images-blog/$NOMBRE]]" >> $PATH_BLOG/program/draft.org
+echo "#+HTML: </center>" >> $PATH_BLOG/program/draft.org
+exit
+fi
+if [ $1 = "-dt" ]
+then
+    grep ":TITLE:" $2 | cut -d " " -f2-	> $TEMP_FILE/title
+    grep ":EXPORT_DATE:" $2 | cut -d " " -f2- > $TEMP_FILE/date
+paste -d, $TEMP_FILE/title $TEMP_FILE/date > $TEMP_FILE/moddate
+exit
+fi    
+if [ $1 = "-d" ]
+then
+PROGRAM=$(grep -c "^* PROGRAM" $PATH_BLOG/program/draft.org)
+echo "
+Enviando $PROGRAM Artículos a program.org...
+ "
+grep -n "^* " $PATH_BLOG/program/draft.org | cut -d ":" -f1 > $TEMP_FILE/firstlines
+while read LINEA; do
+    echo "$LINEA - 1" | bc >> $TEMP_FILE/lastlines
+done < $TEMP_FILE/firstlines
+sed -i '1d' $TEMP_FILE/lastlines
+echo $(cat $PATH_BLOG/program/draft.org  | wc -l) >> $TEMP_FILE/lastlines
+echo "" > $TEMP_FILE/draft.csv
+while read a && read b <&3; do
+    echo "$a,$b" >> $TEMP_FILE/draft.csv
+done < $TEMP_FILE/firstlines 3< $TEMP_FILE/lastlines
+grep -n "^* PROGRAM" $PATH_BLOG/program/draft.org | cut -d ":" -f1 > $TEMP_FILE/draft2program
+while read LINEA; do
+    FIRSTL=$(grep "$LINEA" $TEMP_FILE/draft.csv | cut -d, -f1)
+    LASTL=$(grep "$LINEA" $TEMP_FILE/draft.csv | cut -d, -f2)
+    sed -n ''$FIRSTL','$LASTL' p' $PATH_BLOG/program/draft.org >> $PATH_BLOG/program/program.org
+done < $TEMP_FILE/draft2program
+rm  $TEMP_FILE/firstlines  $TEMP_FILE/lastlines $TEMP_FILE/draft2program $TEMP_FILE/draft.csv $TEMP_FILE/programfirstlines > /dev/null 2>&1
+PROGRAM=$(grep -c "^* BLOG" $PATH_BLOG/program/draft.org)
+echo "
+Enviando $PROGRAM Artículos a blog.org...
+ "
+grep -n "^* " $PATH_BLOG/program/draft.org | cut -d ":" -f1 > $TEMP_FILE/firstlines
+while read LINEA; do
+    echo "$LINEA - 1" | bc >> $TEMP_FILE/lastlines
+done < $TEMP_FILE/firstlines
+sed -i '1d' $TEMP_FILE/lastlines
+echo $(cat $PATH_BLOG/program/draft.org  | wc -l) >> $TEMP_FILE/lastlines
+echo "" > $TEMP_FILE/draft.csv
+while read a && read b <&3; do
+    echo "$a,$b" >> $TEMP_FILE/draft.csv
+done < $TEMP_FILE/firstlines 3< $TEMP_FILE/lastlines
+grep -n "^* BLOG" $PATH_BLOG/program/draft.org | cut -d ":" -f1 > $TEMP_FILE/draft2program
+while read LINEA; do
+    FIRSTL=$(grep "$LINEA" $TEMP_FILE/draft.csv | cut -d, -f1)
+    LASTL=$(grep "$LINEA" $TEMP_FILE/draft.csv | cut -d, -f2)
+    sed -n ''$FIRSTL','$LASTL' p' $PATH_BLOG/program/draft.org >> $PATH_BLOG/blog.org
+done < $TEMP_FILE/draft2program
+rm  $TEMP_FILE/firstlines  $TEMP_FILE/lastlines $TEMP_FILE/draft2program $TEMP_FILE/draft.csv $TEMP_FILE/programfirstlines > /dev/null 2>&1
+sed -i 's|^* PROGRAM|* DONE|g' $PATH_BLOG/program/draft.org
+sed -i 's|^* BLOG|* DONE|g' $PATH_BLOG/program/draft.org
+sed -i 's|^* PROGRAM|* TODO|g' $PATH_BLOG/program/program.org
+sed -i 's|^* BLOG|* TODO|g' $PATH_BLOG/blog.org
+rm  $TEMP_FILE/firstlines  $TEMP_FILE/lastlines $TEMP_FILE/draft2program $TEMP_FILE/draft.csv $TEMP_FILE/programfirstlines > /dev/null 2>&1
+exit
+fi  
+if [ $1 = "program" ] 
+then
+emacs $PATH_BLOG/program/program.org
+exit
+fi
+if [ $1 = "draft" ] 
+then
+emacs $PATH_BLOG/program/draft.org
+exit
+fi
+if [ $1 = "blog" ] 
+then
+emacs $PATH_BLOG/blog.org
+exit
+fi
+if [ $1 = "programt" ] 
+then
+emacs -q -nw $PATH_BLOG/program/program.org
+exit
+fi
+if [ $1 = "draftt" ] 
+then
+emacs -q -nw $PATH_BLOG/program/draft.org
+exit
+fi
+if [ $1 = "blogt" ] 
+then
+emacs -q -nw $PATH_BLOG/blog.org
+exit
+fi
+if [ $1 = "-g" ] 
+then
+    git --git-dir=$PATH_BLOG/.git  --work-tree=$PATH_BLOG add .
+    git --git-dir=$PATH_BLOG/.git  --work-tree=$PATH_BLOG commit -m "update"
+    git --git-dir=$PATH_BLOG/.git  --work-tree=$PATH_BLOG push
+    exit
+fi
+if [ $1 = "-i" ] 
+then
+clear    
+cp org-bash-blog /usr/bin/
+chmod +x /usr/bin/org-bash-blog
+echo "Instalado Org-Bash-Blog"
+echo "Instalando complementos para derivadas de Debian"
+echo ""
+sudo apt update
+sudo apt install bash pandoc xml2 wget bc calcurse whiptail
+echo " "
+echo "Si no utilizas una derivada de Debian, instala los paquetes"
+echo "   bash pandoc xml2 wget bc calcurse whiptail"
+echo ""
+exit
+fi
+if [ $1 = "-ia" ] 
+then 
+echo "Vamos a enviar alias para acceder a tus carpetas de un modo rápido"
+echo "¿Cual es tu archivo de configuración?"
+echo "¿ .bashrc, .zshrc,... ?" 
+read CONFIG_FILE
+echo "alias blog='$PATH_BLOG'" >> $HOME/$CONFIG_FILE
+echo "alias program='"$PATH_BLOG"program'" >> $HOME/$CONFIG_FILE
+clear
+echo "Reinicia tu terminal para que funcionen los nuevos alias."
+echo "blog:    Te lleva directamente a la raíz del directorio del blog"
+echo "program: Te lleva directamente al directorio program"
+exit
+fi
+if [ $1 = "-cal" ] 
+then
+calcurse
+exit
+fi
+if [ $1 = "-w" ] 
+then
+if [ -d ../program ];
+then
+clear    
+echo "Iniciando Previsualización del Post"
+else
+clear
+echo ""
+echo ""
+echo ""
+echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+echo ""
+echo "    NO ESTAS EN EL DIRECTORIO PROGRAM!!     "
+echo ""
+echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+echo ""
+echo ""
+echo "Para situarte en el directorio program, escribe:"
+echo " org-bash-blog -rp"
+exit 1
+fi
 echo "Previsualizando... "
-PROGRAMS_ORG=$2   # add manual program.org
+PROGRAMS_ORG=$2  
 TODO=$(grep -c "^* TODO" $PROGRAMS_ORG)
 echo "
 Programando $TODO Artículos...
@@ -35,7 +266,6 @@ grep ":TITLE:"  $PROGRAMS_ORG | cut -d " " -f2- | tail -$TODO > $TEMP_FILE/title
 grep ":EXPORT_DATE:"  $PROGRAMS_ORG | cut -d " " -f2- | tail -$TODO > $TEMP_FILE/date
 grep -n "^* TODO" $PROGRAMS_ORG | cut -d ":" -f1 > $TEMP_FILE/firstlines
 cat $PROGRAMS_ORG  | wc -l >> $TEMP_FILE/firstlines
-rm *.html
 while read LINEA; do
     echo "$LINEA - 1" | bc >> $TEMP_FILE/lastlines
 done < $TEMP_FILE/firstlines
@@ -53,11 +283,19 @@ while read LINEA; do
     DIA=$(echo $LINEA | cut -d, -f3)
     TITLEPROGRAM=$(echo $LINEA | cut -d, -f4- | sed -e 's/^[ \t]*//; s/[ \t]*$//; /^$/d')
     TITLE_FILE=$(echo $TITLEPROGRAM | sed -e 's/ /-/g'  ) 
-    sed -n "$LINEAP,$LINEAU"p   $PROGRAMS_ORG  > $TITLE_FILE.org
+    sed -n "$LINEAP,$LINEAU"p   $PROGRAMS_ORG | sed 's|^* TODO|*|g' > $TITLE_FILE.org
+    sed -n "$LINEAP,$LINEAU"p   $PROGRAMS_ORG | sed 's|^* TODO|*|g' > post.org
+    sed -i "s|^* |* TODO |g" post.org
+    DESCRIPTION=$(cat post.org | tail -n +11 |  sed '/^ *$/d' | head -n +1 | cut -d " " -f1-30 | sed 's/[ \t]*$//')
+    sed -i "s|:DESCRIPTION:.*|:DESCRIPTION:|g" post.org    
+    sed -i "s|:DESCRIPTION:|:DESCRIPTION: $DESCRIPTION|g" post.org
+    cat post.org >> out.org
     echo $HEAD > $TITLE_FILE.html
     echo $HEAD_PAGE_POST >>  $TITLE_FILE.html
     cat $TITLE_FILE.org | pandoc --from org --to html5 >> $TITLE_FILE.html
     sed -i 's|src="./images-blog/|src="../images-blog/|g' $TITLE_FILE.html
+    sed -i 's|<sub>|_|g' $TITLE_FILE.html
+    sed -i 's|</sub>||g' $TITLE_FILE.html
     rm $TITLE_FILE.org
     echo $PIE_WEB >> $TITLE_FILE.html
 done < $TEMP_FILE/program.csv
@@ -70,54 +308,44 @@ echo '<head>
 <title>org-bash-blog. Index</title>
 </head>
 <body>
-<h1>Org-bash-blog v 5.2.2</h1>
+<h1>Org-bash-blog v 5.2.4</h1>
 <h3>Indice de todas las páginas creadas en tu repositorio</h3>
 <h5>'$(find . -type f | grep .html | wc -l)' archivos .html</h5>
 <h5>' > org-bash-blog.html
 find . -type f | grep .html | sed -r 's/(.*)/\<a href="\1" target="_blank" rel="noopener">\1\<\/a\><br>/' | sort -r >> org-bash-blog.html
 $BROWSER org-bash-blog.html 
-$BROWSER "$TITLE_FILE.html" 
-#rm $TEMP_FILE/program.csv
-rm  $TEMP_FILE/date  $TEMP_FILE/firstlines  $TEMP_FILE/lastlines  $TEMP_FILE/primeralinea  $TEMP_FILE/temp  $TEMP_FILE/ultimalinea $TEMP_FILE/program.csv  $TEMP_FILE/title
-else
-if [ $1 = "-h" ]
-then
-echo "
-
-Modo de empleo:     ./org-bash-blog [ARCHIVO ORG-MODE] 
-
-       Comando                      Significado
-       ./org-bash-blog -h           Ayuda
-       ./org-bash-blog -b           Construir carpetas
-       ./org-bash-blog -n           Nuevo Post
-       ./org-bash-blog -f           Crear Nuevo Org-Mode
-       ./org-bash-blog -p           Programar Post por fecha y hora
-       ./org-bash-blog -w           Previsualizar Post programados
-
-
-Ejemplos:
-
-./org-bash-blog -n [ARCHIVO ORG-MODE] 'Título del Artículo'
-./org-bash-blog -f [ARCHIVO ORG-MODE] 
-./org-bash-blog -w [ARCHIVO ORG-MODE] 
-
-
-
-Post Programados:
-
-$(crontab -l | grep "org-bash-blog" | grep "^# " | sed -e 's/^.//' | cut -d '#' -f1 )
-
-
-
-"
-else  
+$BROWSER
+rm  $TEMP_FILE/date  $TEMP_FILE/firstlines  $TEMP_FILE/lastlines  $TEMP_FILE/primeralinea  $TEMP_FILE/temp  $TEMP_FILE/ultimalinea $TEMP_FILE/program.csv  $TEMP_FILE/title 2>/dev/null
+cp out.org $PROGRAMS_ORG
+rm out.org post.org
+exit
+fi
 if [ $1 = "-b" ]
 then
-mkdir -p icon css org post images-blog .temp $HOME/.config/org-bash-blog/ program/
-else  
+mkdir -p icon css org post images-blog categories .temp $HOME/.config/org-bash-blog/ program/
+exit
+fi
 if [ $1 = "-p" ]
 then
-#PROGRAMS_ORG=$2   # add manual program.org
+mkdir -p /home/$USER/.config/org-bash-blog/    /home/$USER/.calcurse/
+ART="0"
+while read LINEA
+do
+    INC=$(echo "$LINEA" | cut -d " " -f1,2)
+    if [ "$INC" = "* TODO" ]
+    then
+	ART=$((1+$ART))     
+    fi
+    echo "$LINEA" >> $PATH_BLOG.temp/$ART.torg
+done < $PROGRAMS_ORG 
+ls $PATH_BLOG.temp/*.torg -1 > $PATH_BLOG.temp/list.txt
+while read LINEA
+do
+    DATE_POST=$(grep ":EXPORT_DATE:" $LINEA | cut -d " " -f2)
+    mv $LINEA  $DATE_POST-$LINEA
+done < $PATH_BLOG.temp/list.txt
+cat $(ls -r $PATH_BLOG.temp/*.torg)  > program.org
+rm $PATH_BLOG.temp/list.txt $PATH_BLOG.temp/*.torg
 TODO=$(grep -c "^* TODO" $PROGRAMS_ORG)
 echo "
 Programando $TODO Artículos...
@@ -138,6 +366,8 @@ echo "######### org-bash-blog #########" > $TEMP_FILE/cron_program
 echo " " >> $TEMP_FILE/cron_program
 rm   "$PATH_SCRIPTS_PROGRAMS"org-bash-blog_program*
 VOL=0
+grep -v "## org-bash-blog"  ~/.calcurse/apts > ~/.calcurse/apt
+mv ~/.calcurse/apt ~/.calcurse/apts
 while read LINEA; do
     NUM=$(echo "$VOL + 1" | bc )
     VOL=$NUM
@@ -145,6 +375,7 @@ while read LINEA; do
     LINEAU=$(echo $LINEA | cut -d, -f2)
     DIA=$(echo $LINEA | cut -d, -f3)
     TITLEPROGRAM=$(echo $LINEA | cut -d, -f4- | sed -e 's/^[ \t]*//; s/[ \t]*$//; /^$/d')
+    echo "$(date -d "$DIA" +'%m/%d/%Y @ %H:%M -> %m/%d/%Y @ %H:%M')|$TITLEPROGRAM ## org-bash-blog" >> ~/.calcurse/apts
     echo "# $(date -d "$DIA" +'%A %d de %B del %Y a las %H:%Mh') -> $TITLEPROGRAM ## org-bash-blog " >> $TEMP_FILE/cron_program
     date -d "$DIA" +'%M %H %d %m * bash '$PATH_SCRIPTS_PROGRAMS''org-bash-blog_program$NUM'.sh'  >> $TEMP_FILE/cron_program
     echo " " >> $TEMP_FILE/cron_program
@@ -152,6 +383,7 @@ while read LINEA; do
     echo  "sed -i '"$LINEAP","$LINEAU"d' "$PROGRAMS_ORG"" >> $PATH_SCRIPTS_PROGRAMS'org-bash-blog_program'$NUM.sh
     echo  "cd $PATH_BLOG  ; $ORG_BASH_BLOG $BLOG_ORG" >> $PATH_SCRIPTS_PROGRAMS'org-bash-blog_program'$NUM.sh
     echo  $PUBLISH >>  $PATH_SCRIPTS_PROGRAMS'org-bash-blog_program'$NUM.sh
+    echo  $SECOND_PUBLISH >>  $PATH_SCRIPTS_PROGRAMS'org-bash-blog_program'$NUM.sh
     echo  "rm   $PATH_SCRIPTS_PROGRAMS'org-bash-blog_program'$NUM.sh" >>  $PATH_SCRIPTS_PROGRAMS'org-bash-blog_program'$NUM.sh
     echo "Artículo: Nº$NUM  
 Título:   $TITLEPROGRAM   
@@ -166,35 +398,185 @@ sed -i '/^ *$/d' $TEMP_FILE/my_cron
 cat $TEMP_FILE/cron_program >> $TEMP_FILE/my_cron
 crontab $TEMP_FILE/my_cron
 rm $TEMP_FILE/my_cron $TEMP_FILE/cron_program
-else  
-if [ $1 = "-n" ]
-then
-echo "Creada Nueva Entrada"
+rm *.html > /dev/null 2>&1
+exit
+fi
+if [ $1 = "-nim" ]
+then   
+    clear
+DRAFT_POST=$(whiptail --title "Org-Bash-Blog" \
+			 --inputbox "Título del artículo" 7 40 \
+			 3>&1 1>&2 2>&3)
+                         status=$?
+                         if [ $status = 0 ]
+                         then
+			     echo "Nuevo Artículo"
+			     echo "--------------"
+			    
+                             echo " Título:    $DRAFT_POST"
+                         else
+			     clear
+			     echo " Artículo cancelado"
+                             exit
+			     
+                         fi
+DRAFT_CAT=$(whiptail --title "Org-Bash-Blog" \
+			 --inputbox "Categoria" 7 40 \
+			 3>&1 1>&2 2>&3)
+                         status=$?
+                         if [ $status = 0 ]
+                         then
+                                echo " Categoría: $DRAFT_CAT"
+                         else
+			     clear
+    			     echo " Artículo cancelado"
+                        	exit
+                         fi
+DRAFT_TAGS=$(whiptail --title "Org-Bash-Blog" \
+			 --inputbox "Tags" 7 40 \
+			 3>&1 1>&2 2>&3)
+                         status=$?
+                         if [ $status = 0 ]
+                         then
+                                echo " Etiquetas: $DRAFT_TAGS"
+                         else
+			     clear
+			     echo " Artículo cancelado"
+                         	exit
+                         fi
+DRAFT_IMAGE=$(whiptail --title "Org-Bash-Blog" \
+			 --inputbox "Nombre de la imagen. Ejemplo: imagen.png" 7 40 \
+			 3>&1 1>&2 2>&3)
+                         status=$?
+                         if [ $status = 0 ]
+                         then
+                                echo " Imagen:    $DRAFT_IMAGE"
+                         else
+			       clear
+                         	exit
+                         fi
+URL_IMAGE=$(whiptail --title "Org-Bash-Blog" \
+			 --inputbox "url de la imagen. Si la importas de un servidor" 7 40 \
+			 3>&1 1>&2 2>&3)
+                         status=$?
+                         if [ $status = 0 ]
+                         then
+                        	wget -O $PATH_BLOG"images-blog"/$DRAFT_IMAGE  $URL_IMAGE 2>/dev/null
+                         else
+			     clear
+			     echo " Artículo cancelado"
+                        	exit
+                         fi
 DIA=$(date +"%Y-%m-%d %H:%M")
-echo '* TODO '$3'
+echo '* TODO '$DRAFT_POST'
 :PROPERTIES:
-:TITLE: '$3'
-:EXPORT_FILE_NAME: '$3'
+:TITLE: '$DRAFT_POST'
+:EXPORT_FILE_NAME: '$(echo $DRAFT_POST | sed 'y/:,.;áÁàÀãÃâÂéÉêÊíÍóÓõÕôÔúÚñÑçÇ/----aAaAaAaAeEeEiIoOoOoOuUnNcC/' | sed 's| |-|g' | sed 's|--|-|g' | tr '[:upper:]' '[:lower:]' | cut -d " " -f1,2,3,4,5,6,7,8,9,10)'
 :DESCRIPTION:
 :EXPORT_DATE: '$DIA'
-:CATEGORY:
-:TAG:
-:IMAGE:
+:CATEGORY: '$DRAFT_CAT'
+:TAG: '$DRAFT_TAGS'
+:IMAGE: ./images-blog/'$DRAFT_IMAGE'
 :END:
-' >> $2
-$EMACS $2
-else  
+[[./images-blog/'$DRAFT_IMAGE']]
+' >> $DRAFT_ORG
+mv "$2" `echo $2 | tr ' ' '_'`
+pandoc -t org `echo $2 | tr ' ' '_'` --columns 1000000000 | sed -E "/^[[:space:]]+:/ d" >> $DRAFT_ORG
+$EMACS $DRAFT_ORG
+exit
+fi
+if [ $1 = "-n" ]
+then
+    clear
+    #
+DRAFT_POST=$(whiptail --title "Org-Bash-Blog" \
+			 --inputbox "Título del artículo" 7 40 \
+			 3>&1 1>&2 2>&3)
+                         status=$?
+                         if [ $status = 0 ]
+                         then
+			     echo "Nuevo Artículo"
+			     echo "--------------"
+			    
+                             echo " Título:    $DRAFT_POST"
+                         else
+			     clear
+			     echo " Artículo cancelado"
+                             exit
+			     
+                         fi
+DRAFT_CAT=$(whiptail --title "Org-Bash-Blog" \
+			 --inputbox "Categoria" 7 40 \
+			 3>&1 1>&2 2>&3)
+                         status=$?
+                         if [ $status = 0 ]
+                         then
+                                echo " Categoría: $DRAFT_CAT"
+                         else
+			     clear
+    			     echo " Artículo cancelado"
+                        	exit
+                         fi
+DRAFT_TAGS=$(whiptail --title "Org-Bash-Blog" \
+			 --inputbox "Tags" 7 40 \
+			 3>&1 1>&2 2>&3)
+                         status=$?
+                         if [ $status = 0 ]
+                         then
+                                echo " Etiquetas: $DRAFT_TAGS"
+                         else
+			     clear
+			     echo " Artículo cancelado"
+                         	exit
+                         fi
+DRAFT_IMAGE=$(whiptail --title "Org-Bash-Blog" \
+			 --inputbox "Nombre de la imagen. Ejemplo: imagen.png" 7 40 \
+			 3>&1 1>&2 2>&3)
+                         status=$?
+                         if [ $status = 0 ]
+                         then
+                                echo " Imagen:    $DRAFT_IMAGE"
+                         else
+			       clear
+                         	exit
+                         fi
+URL_IMAGE=$(whiptail --title "Org-Bash-Blog" \
+			 --inputbox "url de la imagen. Si la importas de un servidor" 7 40 \
+			 3>&1 1>&2 2>&3)
+                         status=$?
+                         if [ $status = 0 ]
+                         then
+                        	wget -O $PATH_BLOG"images-blog"/$DRAFT_IMAGE  $URL_IMAGE 2>/dev/null
+                         else
+			     clear
+			     echo " Artículo cancelado"
+                        	exit
+                         fi
+			 
+DIA=$(date +"%Y-%m-%d %H:%M")
+echo '* TODO '$DRAFT_POST'
+:PROPERTIES:
+:TITLE: '$DRAFT_POST'
+:EXPORT_FILE_NAME: '$(echo $DRAFT_POST | sed 'y/:,.;áÁàÀãÃâÂéÉêÊíÍóÓõÕôÔúÚñÑçÇ/----aAaAaAaAeEeEiIoOoOoOuUnNcC/' | sed 's| |-|g' | sed 's|--|-|g' | tr '[:upper:]' '[:lower:]' | cut -d " " -f1,2,3,4,5,6,7,8,9,10)'
+:DESCRIPTION:
+:EXPORT_DATE: '$DIA'
+:CATEGORY: '$DRAFT_CAT'
+:TAG: '$DRAFT_TAGS'
+:IMAGE: ./images-blog/'$DRAFT_IMAGE'
+:END:
+[[./images-blog/'$DRAFT_IMAGE']]
+' >> $DRAFT_ORG
+$EMACS $DRAFT_ORG
+exit
+fi
 if [ $1 = "-f" ]
 then
 echo "
-#+TITLE:
-#+LINK:
-#+DESCRIPTION:
-#+KEYWORDS:
-#+AUTHOR:
-
  " > $2
-else      
+exit
+fi
+if [ -f "$1" ]
+then
 TITLE=$(grep "#+TITLE:" $1 | cut -d " " -f2-)
 LINK=$(grep "#+LINK:" $1 | cut -d " " -f2-)
 DESCRIPTION=$(grep "#+DESCRIPTION:" $1 | cut -d " " -f2-)
@@ -269,7 +651,7 @@ OTHERSDATE=$(echo  $LINEA | cut -d, -f4)
 echo "- [[$LINK/post/$OTHERSDATE-$OTHERSLINKS.html][$OTHERSTITLE]]" >> temp_post.org
 done < category_temp_post.csv
 FILE_TITLE=$(grep ":TITLE:" temp_post.org | cut -d " " -f2- | sed 's/|/,/g')
-FILE_NAME=$(grep ":EXPORT_FILE_NAME:" temp_post.org | cut -d " " -f2- |awk '{print tolower($0)}' |  sed 's/ /-/g')
+FILE_NAME=$(grep ":EXPORT_FILE_NAME:" temp_post.org | cut -d " " -f2- |awk '{print tolower($0)}' | sed 's/[ \t]*$//' |  sed 's/ /-/g')
 FILE_DATE=$(grep ":EXPORT_DATE:" temp_post.org | cut -d " " -f2)
 FILE_IMAGE=$(grep ":IMAGE:" temp_post.org  | cut -d " " -f2- | sed 's|./images-blog/||g' | sed 's/ //g' )
 FILE=$(echo "$FILE_DATE-$FILE_NAME")
@@ -288,39 +670,27 @@ echo '<head>
 <div id="logo"><a href="https://ugeek.github.io"><img src="../icon/ugeek.png" border="0"  width="90" height="90" alt="uGeek"></a></div>
 <link rel="stylesheet" type="text/css" href="../css/stylesheet.css" />
 <link rel="alternate" type="application/rss+xml" href="'$LINK'/feed.xml" title="uGeek - Blog de Tecnología">
-
 <link rel="shortcut icon" href="'$LINK$ICON'" type="image/x-icon" />
 <link rel="icon" href="'$LINK$ICON'" sizes="32x32" />
 <link rel="icon" href="'$LINK$ICON'" sizes="192x192" />
 <link rel="apple-touch-icon-precomposed" href="'$LINK$ICON'" />
 <meta property="og:locale" content="'$LANGUAGE'" />
-
-
-
 <meta name="robots" content="index, follow">
 <meta name="twitter:site" content="'$TWITTER'" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="alternate" type="application/rss+xml" title="uGeek. Blog de Tecnología" href="'$LINK'/feed/" />
-
-
 <meta name="author" content="'$AUTHOR'">
 <meta name="description" content="'$FILE_DESCRIPTION'" />
-
-
 <meta property="og:site_name" content="'$TITLE'"/>
 <meta property="og:type" content="article" /> 
 <meta property="og:title" content="'$FILE_TITLE'" />
 <meta property="og:description" content="'$FILE_DESCRIPTION'" />
 <meta property="og:image" content="'$LINK'/images-blog/'$FILE_IMAGE'" />
 <meta property="og:url" content="'$LINK'/post/'$FILE'.html" />
-
 <meta name="twitter:title" content="'$FILE_TITLE'" />
 <meta name="twitter:description" content="'$FILE_DESCRIPTION'" />
 <meta name="twitter:image" content="'$LINK'/images-blog/'$FILE_IMAGE'" />
-
-
 <link rel="stylesheet" type="text/css" href="css/stylesheet.css" /><link rel="alternate" type="application/rss+xml" href="https://ugeek.github.io/feed.xml" title="uGeek - Blog de Tecnología">
-
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id='$GOOGLE_ANALITYCS'"></script>
 <script>
@@ -329,14 +699,41 @@ function gtag(){dataLayer.push(arguments);}
 gtag("'js'", new Date())
 gtag("'config'", "'$GOOGLE_ANALITYCS'");
 </script>
-
+<link type="text/css" rel="stylesheet" href="../css/search.css"></link>
+<link rel="stylesheet" type="text/css" href="../css/stylesheet.css" />
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/tipuesearch_set.js"></script>
+<script type="text/javascript" src="../content.js"></script>
+<script type="text/javascript" src="../js/tipuesearch.min.js"></script>
 </head>
-
 <br><br><br><br><br><br><br><br><br>
-
 '$HEAD_PAGE_POST'
+<!-- THIS IS THE SEARCH BOX -->
+<input type="text" name="q" placeholder="buscar..."  id="tipue_search_input"  required>
+<!-- <input type="text" name="q" id="tipue_search_input" autocomplete="off" required> -->
+<!-- THIS IS WHERE YOU DISPLAY THE SEARCH RESULTS -->
+<div align="center" id="tipue_search_content"></div>
+<!-- THIS JAVASCRIPT CODE DISPLAY THE SEARCH RESULTS -->
+<script>
+$(document).ready(function() {
+$("#tipue_search_input").tipuesearch();
+});
+</script>
+<!-- END BOX -->
 ' >   $FILE.html
+NUM_WORDS=$(cat $FILE.org | tail -n +11 |  sed '/^ *$/d' | sed 's|^#.*||g' | sed 's|^\[.*||g' | sed 's|^** ||g' | sed '/^$/d' | wc -w)
+MIN=$(echo ""$NUM_WORDS"/110" | bc)
+sed -i 's|:END:|:END:\n\n#+HTML: <h5>Tiempo estimado de lectura: '$MIN' minutos. '$NUM_WORDS' palabras.    <a href="https://ugeek.github.io/blog/categories/'$CATEGORY'">'$CATEGORY'</a></h5>\n \n|g' $FILE.org
+PUBLISH_DATE=$(date -d "$FILE_DATE" +'%Y%m%d')
+TODAY_DATE=$(date --date='+3 year' +"%Y%m%d")
+if [ "$PUBLISH_DATE" -ge "$TODAY_DATE" ] ; then   
+echo "#+HTML:<br><style>p.antiguo { font-family: "Arial" ; color: #FFFFFF ; background-color: #5e1cb3 }</style><center><p class="antiguo">Este artículo se publicó hace más de 3 años. Puede tener contenido desactualizado.</p></center>" >> $FILE.org
+else
+echo " " > /dev/null 2>&1
+fi
 cat $FILE.org | pandoc --from org --to html5 >> $FILE.html
+sed -i 's|<sub>|_|g' $FILE.html
+sed -i 's|</sub>||g' $FILE.html
 ORG=$(echo '<br><br><br><p style="text-align: center;">Powered by <a href="https://github.com/ugeek/org-bash-blog" target="_blank" rel="noopener">org-bash-blog</a></p><p style="text-align: center;">Writing in orgmode whith emacs</p>')
 echo $ORG $PIE_WEB  >> $FILE.html
 rm $FILE.org
@@ -401,24 +798,14 @@ echo "    <description>" >> feed.xml
 echo '&lt;img src="'$IMAGE_POST'" alt="'$TITLE_F'"&gt;'   >> feed.xml
 echo "&lt;br&gt;&lt;p&gt;$DESC... 
 &lt;p&gt;Sigue leyendo el post completo de &lt;a href="$LINK/post/$DATE-$LINK_P.html"&gt;$TITLE_F&lt;/a&gt;
-
 &lt;/a&gt;&lt;/p&gt;&lt;p&gt;
-
 &lt;a href="$LINK"&gt;Visita $TITLE&lt;/a&gt;
-
 &lt;/a&gt;&lt;/p&gt;&lt;p&gt;
-
 &lt;a href="https://ugeek.github.io"&gt;Visita uGeek Podcast&lt;/a&gt;
-
-
 &lt;/a&gt;&lt;/p&gt;&lt;p&gt;
-
 &lt;a href="http://feeds.feedburner.com/ugeekblog"&gt;Suscribete al Blog de uGeek&lt;/a&gt;
-
 &lt;/a&gt;&lt;/p&gt;&lt;p&gt;
-
 &lt;a href="http://feeds.feedburner.com/ugeek"&gt;Suscribete al Podcast de uGeek&lt;/a&gt;
-
 </description>" >> feed.xml
 echo "    <pubDate>$DATEPUB</pubDate>" >> feed.xml
 echo '    <category>'$CATEGORY_POST'</category>'  >> feed.xml
@@ -469,24 +856,14 @@ echo "    <description>" >> $WORD.xml
 echo '&lt;img src="'$IMAGE_POST'" alt="'$TITLE_F'"&gt;'   >> $WORD.xml
 echo "&lt;br&gt;&lt;p&gt;$DESC... 
 &lt;p&gt;Sigue leyendo el post completo de &lt;a href="$LINK/post/$DATE-$LINK_P.html"&gt;$TITLE_F&lt;/a&gt;
-
 &lt;/a&gt;&lt;/p&gt;&lt;p&gt;
-
 &lt;a href="$LINK"&gt;Visita $TITLE&lt;/a&gt;
-
 &lt;/a&gt;&lt;/p&gt;&lt;p&gt;
-
 &lt;a href="https://ugeek.github.io"&gt;Visita uGeek Podcast&lt;/a&gt;
-
-
 &lt;/a&gt;&lt;/p&gt;&lt;p&gt;
-
 &lt;a href="http://feeds.feedburner.com/ugeekblog"&gt;Suscribete al Blog de uGeek&lt;/a&gt;
-
 &lt;/a&gt;&lt;/p&gt;&lt;p&gt;
-
 &lt;a href="http://feeds.feedburner.com/ugeek"&gt;Suscribete al Podcast de uGeek&lt;/a&gt;
-
 </description>" >> $WORD.xml
 echo "    <pubDate>$DATEPUB</pubDate>" >> $WORD.xml
 echo '    <category>'$CATEGORY_POST'</category>'  >> $WORD.xml
@@ -509,7 +886,6 @@ while read LINEA; do
 TPOST=$(echo $LINEA | cut -d, -f1 | sed 's/|/,/g')
 UPOST=$(echo $LINEA | cut -d, -f2)
 DPOST=$(echo $LINEA | cut -d, -f4)
-#echo "- /$DPOST/ - [[$LINK/post/$DPOST-$UPOST.html][$TPOST]] " >> index.org
 echo "- [[$LINK/post/$DPOST-$UPOST.html][$TPOST]] " >> index.org
 done < posts_home.csv
 echo "$INDEX_NEXT" >> index.org
@@ -519,33 +895,25 @@ echo '<head>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <div id="logo"><a href="https://ugeek.github.io"><img src="./icon/ugeek.png" border="0"  width="90" height="90" alt="uGeek"></a></div>
 <link rel="stylesheet" type="text/css" href="./css/stylesheet.css" /><link rel="alternate" type="application/rss+xml" href="https://ugeek.github.io/feed.xml" title="uGeek - Blog de Tecnología">
-
 <meta name="twitter:site" content="'$TWITTER'" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="alternate" type="application/rss+xml" title="uGeek. Blog de Tecnología" href="'$LINK'/feed/" />
-
-
 <meta name="robots" content="index, follow">
 <meta name="author" content="'$AUTHOR'">
 <meta name="description" content="'$DESCRIPTION'" />
-
 <link rel="shortcut icon" href="'$LINK$ICON'" type="image/x-icon" />
 <link rel="icon" href="'$LINK$ICON'" sizes="32x32" />
 <link rel="icon" href="'$LINK$ICON'" sizes="192x192" />
 <link rel="apple-touch-icon-precomposed" href="'$LINK$ICON'" />
 <meta property="og:locale" content="'$LANGUAGE'" />
-
-
 <meta property="og:site_name" content="'$TITLE'"/> 
 <meta property="og:title" content="'$TITLE'" />
 <meta property="og:description" content="'$DESCRIPTION'" />
 <meta property="og:image" content="'$IMAGE'" />
 <meta property="og:url" content="'$LINK'index.html" />
-
 <meta name="twitter:title" content="'$TITLE'" />
 <meta name="twitter:description" content="'$DESCRIPTION'" />
 <meta name="twitter:image" content="'$IMAGE'" />
-
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id='$GOOGLE_ANALITYCS'"></script>
 <script>
@@ -554,17 +922,39 @@ function gtag(){dataLayer.push(arguments);}
 gtag("'js'", new Date())
 gtag("'config'", "'$GOOGLE_ANALITYCS'");
 </script>
-
-
+<link type="text/css" rel="stylesheet" href="css/search.css"></link>
+<link rel="stylesheet" type="text/css" href="./css/stylesheet.css" />
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/tipuesearch_set.js"></script>
+<script type="text/javascript" src="content.js"></script>
+<script type="text/javascript" src="js/tipuesearch.min.js"></script>
 </head>
-
 <br><br><br><br><br><br><br><br><br>
 '$HEAD_PAGE'
+<!-- THIS IS THE SEARCH BOX -->
+<input type="text" name="q" placeholder="buscar..."  id="tipue_search_input"  required>
+<!-- <input type="text" name="q" id="tipue_search_input" autocomplete="off" required> -->
+<!-- THIS IS WHERE YOU DISPLAY THE SEARCH RESULTS -->
+<div align="center" id="tipue_search_content"></div>
+<!-- THIS JAVASCRIPT CODE DISPLAY THE SEARCH RESULTS -->
+<script>
+$(document).ready(function() {
+ $("#tipue_search_input").tipuesearch();
+});
+</script>
+<!-- END BOX -->
 '> index.html
+echo "Categorías" > $PATH_BLOG/categories.org 
+ls -1 $PATH_BLOG/categories/ | cut -d"." -f1 | while read linea
+do
+    echo "- [["$LINK"/categories/"$linea".html]["$linea"]]"
+done >> $PATH_BLOG/categories.org
 cat index.org | pandoc --from org --to html5 >> index.html
 echo $ORG $PIE_WEB  >> index.html
 sed -i 's|__icon/|icon/|g' index.html
 sed -i 's|__css/|css/|g' index.html
+sed -i 's|<sub>|_|g' index.html
+sed -i 's|</sub>||g' index.html
 rm index.org posts_home.csv
 echo "Generando Lista de Artículos"
 echo "* $NUM_POSTS Artículos Publicados" >> list.org
@@ -580,33 +970,25 @@ echo '<head>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <div id="logo"><a href="https://ugeek.github.io"><img src="./icon/ugeek.png" border="0"  width="90" height="90" alt="uGeek"></a></div>
 <link rel="stylesheet" type="text/css" href="./css/stylesheet.css" /><link rel="alternate" type="application/rss+xml" href="https://ugeek.github.io/feed.xml" title="uGeek - Blog de Tecnología">
-
-
 <meta name="twitter:site" content="'$TWITTER'" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="alternate" type="application/rss+xml" title="uGeek. Blog de Tecnología" href="'$LINK'/feed/" />
-
 <meta name="robots" content="index, follow">
 <meta name="author" content="'$AUTHOR'">
 <meta name="description" content="'$DESCRIPTION'" />
-
 <link rel="shortcut icon" href="'$LINK$ICON'" type="image/x-icon" />
 <link rel="icon" href="'$LINK$ICON'" sizes="32x32" />
 <link rel="icon" href="'$LINK$ICON'" sizes="192x192" />
 <link rel="apple-touch-icon-precomposed" href="'$LINK$ICON'" />
 <meta property="og:locale" content="'$LANGUAGE'" />
-
-
 <meta property="og:site_name" content="'$TITLE'"/> 
 <meta property="og:title" content="'$TITLE'" />
 <meta property="og:description" content="'$DESCRIPTION'" />
 <meta property="og:image" content="'$IMAGE'" />
 <meta property="og:url" content="'$LINK'index.html" />
-
 <meta name="twitter:title" content="'$TITLE'" />
 <meta name="twitter:description" content="'$DESCRIPTION'" />
 <meta name="twitter:image" content="'$IMAGE'" />
-
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id='$GOOGLE_ANALITYCS'"></script>
 <script>
@@ -615,25 +997,41 @@ function gtag(){dataLayer.push(arguments);}
 gtag("'js'", new Date())
 gtag("'config'", "'$GOOGLE_ANALITYCS'");
 </script>
-
-
+<link type="text/css" rel="stylesheet" href="css/search.css"></link>
+<link rel="stylesheet" type="text/css" href="./css/stylesheet.css" />
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/tipuesearch_set.js"></script>
+<script type="text/javascript" src="content.js"></script>
+<script type="text/javascript" src="js/tipuesearch.min.js"></script>
 </head>
-
 <br><br><br><br><br><br><br><br><br>
-
 '$HEAD_PAGE'
+<!-- THIS IS THE SEARCH BOX -->
+<input type="text" name="q" placeholder="buscar..."  id="tipue_search_input"  required>
+<!-- <input type="text" name="q" id="tipue_search_input" autocomplete="off" required> -->
+<!-- THIS IS WHERE YOU DISPLAY THE SEARCH RESULTS -->
+<div align="center" id="tipue_search_content"></div>
+<!-- THIS JAVASCRIPT CODE DISPLAY THE SEARCH RESULTS -->
+<script>
+$(document).ready(function() {
+ $("#tipue_search_input").tipuesearch();
+});
+</script>
+<!-- END BOX -->
 ' > list.html
 cat list.org | pandoc --from org --to html5 >> list.html
 echo $ORG $PIE_WEB  >> list.html
 sed -i 's|__icon/|icon/|g' list.html
 sed -i 's|__css/|css/|g' list.html
+sed -i 's|<sub>|_|g' list.html
+sed -i 's|</sub>||g' list.html
 rm list.org
 echo "Generando Clasificación por Tags"
 echo "** Etiquetas" >> tag.org
 echo " " >> tag.org
 while read TAG; do 
 grep -i "$TAG" posts.csv > temp_tag.csv
-echo "*** $TAG" >> tag.org
+echo "#+HTML: <H3><a name="""\#$TAG""">$TAG</a></H3>" >> tag.org
 NUM_TAGS=$(cat tag.csv | wc -l)
 while read LINEA; do 
 TPOST=$(echo $LINEA | cut -d, -f1 | sed 's/|/,/g' )
@@ -649,34 +1047,25 @@ echo '<head>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <div id="logo"><a href="https://ugeek.github.io"><img src="./icon/ugeek.png" border="0"  width="90" height="90" alt="uGeek"></a></div>
 <link rel="stylesheet" type="text/css" href="./css/stylesheet.css" /><link rel="alternate" type="application/rss+xml" href="https://ugeek.github.io/feed.xml" title="uGeek - Blog de Tecnología">
-
 <meta name="twitter:site" content="'$TWITTER'" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="alternate" type="application/rss+xml" title="uGeek. Blog de Tecnología" href="'$LINK'/feed/" />
-
-
 <meta name="robots" content="index, follow">
 <meta name="author" content="'$AUTHOR'">
 <meta name="description" content="'$DESCRIPTION'" />
- 
-
 <link rel="shortcut icon" href="'$LINK$ICON'" type="image/x-icon" />
 <link rel="icon" href="'$LINK$ICON'" sizes="32x32" />
 <link rel="icon" href="'$LINK$ICON'" sizes="192x192" />
 <link rel="apple-touch-icon-precomposed" href="'$LINK$ICON'" />
 <meta property="og:locale" content="'$LANGUAGE'" />
-
-
 <meta property="og:site_name" content="'$TITLE'"/>
 <meta property="og:title" content="'$TITLE'" />
 <meta property="og:description" content="'$DESCRIPTION'" />
 <meta property="og:image" content="'$IMAGE'" />
 <meta property="og:url" content="'$LINK'index.html" />
-
 <meta name="twitter:title" content="'$TITLE'" />
 <meta name="twitter:description" content="'$DESCRIPTION'" />
 <meta name="twitter:image" content="'$IMAGE'" />
-
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id='$GOOGLE_ANALITYCS'"></script>
 <script>
@@ -685,32 +1074,102 @@ function gtag(){dataLayer.push(arguments);}
 gtag("'js'", new Date())
 gtag("'config'", "'$GOOGLE_ANALITYCS'");
 </script>
-
-
 </head>
-
 <br><br><br><br><br><br><br><br><br>
-
 '$HEAD_PAGE'
 ' > tag.html
 cat tag.org | pandoc --from org --to html5 >> tag.html
 echo $ORG $PIE_WEB  >> tag.html
 sed -i 's|__icon/|icon/|g' tag.html
 sed -i 's|__css/|css/|g' tag.html
+sed -i 's|<sub>|_|g' tag.html
+sed -i 's|</sub>||g' tag.html
 rm tag.org category_temp_post.csv cat_temp.csv
+echo "Generando Buscador"
+echo "var tipuesearch = {"pages": [" > content.js
+while read LINEA
+do
+    TITLE_CONTENT=$(echo $LINEA | cut -d, -f1 | sed 's|\||,|g' | sed "s|'|,|g") 
+    TEXT_CONTENT=$(echo $LINEA | cut -d, -f3 | sed 's|\||,|g' | sed "s|'|,|g")
+    TAGS_CONTENT=$(echo $LINEA | cut -d, -f5-10)
+    DATE_CONTENT=$(echo $LINEA | cut -d, -f4)
+    NAME_CONTENT=$(echo $LINEA | cut -d, -f2)
+    URL_CONTENT=$(echo "$DATE_CONTENT-$NAME_CONTENT.html")
+    echo "{"  >> content.js
+    echo "            '"title"': '"$TITLE_CONTENT"',"  >> content.js
+    echo "            '"text"': '"$TEXT_CONTENT"', "  >> content.js
+    echo "            '"tags"': '"$TAGS_CONTENT"', "  >> content.js
+    echo "            '"url"': '"$LINK/post/$URL_CONTENT"' "  >> content.js
+    echo "}," >> content.js
+done < posts.csv
+echo "]};" >> content.js
+echo "Generando Páginas de Categorias"
+ls -1 org | cut -d"." -f1 > cat
+while read CAT; do 
+echo '<head>
+<title>'$CAT'</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<div id="logo"><a href="https://ugeek.github.io"><img src="../icon/ugeek.png" border="0"  width="90" height="90" alt="uGeek"></a></div>
+<link rel="stylesheet" type="text/css" href="../css/stylesheet.css" />
+<link rel="alternate" type="application/rss+xml" href="'$LINK'/feed.xml" title="uGeek - Blog de Tecnología">
+<link rel="shortcut icon" href="'$LINK$ICON'" type="image/x-icon" />
+<link rel="icon" href="'$LINK$ICON'" sizes="32x32" />
+<link rel="icon" href="'$LINK$ICON'" sizes="192x192" />
+<link rel="apple-touch-icon-precomposed" href="'$LINK$ICON'" />
+<meta property="og:locale" content="'$LANGUAGE'" />
+<meta name="robots" content="index, follow">
+<meta name="twitter:site" content="'$TWITTER'" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="alternate" type="application/rss+xml" title="uGeek. Blog de Tecnología" href="'$LINK'/feed/" />
+<meta name="author" content="'$AUTHOR'">
+<meta name="description" content="'$FILE_DESCRIPTION'" />
+<meta property="og:site_name" content="'$TITLE'"/>
+<meta property="og:type" content="article" /> 
+<meta property="og:title" content="'$FILE_TITLE'" />
+<meta property="og:description" content="'$FILE_DESCRIPTION'" />
+<meta property="og:image" content="'$LINK'/images-blog/'$FILE_IMAGE'" />
+<meta property="og:url" content="'$LINK'/post/'$FILE'.html" />
+<meta name="twitter:title" content="'$FILE_TITLE'" />
+<meta name="twitter:description" content="'$FILE_DESCRIPTION'" />
+<meta name="twitter:image" content="'$LINK'/images-blog/'$FILE_IMAGE'" />
+<link rel="stylesheet" type="text/css" href="css/stylesheet.css" /><link rel="alternate" type="application/rss+xml" href="https://ugeek.github.io/feed.xml" title="uGeek - Blog de Tecnología">
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id='$GOOGLE_ANALITYCS'"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag("'js'", new Date())
+gtag("'config'", "'$GOOGLE_ANALITYCS'");
+</script>
+</head>
+<br><br><br><br><br><br><br><br><br>
+'$HEAD_PAGE_POST'
+' >   categories/$CAT.html
+echo "<h2><a>$CAT</a></h2>" >> categories/$CAT.html
+grep "$CAT" postsID.csv > post_cat.csv
+echo "<ul>" >> categories/$CAT.html
+while read LINEA; do 
+    TITLE_POST=$(echo $LINEA | cut -d, -f2 | sed 's|\||,|g')
+    DATE_POST=$(echo $LINEA | cut -d, -f5)
+    LINK_POST=$(echo $LINEA | cut -d, -f3)
+    echo  " <li><a href="$LINK/post/$DATE_POST-$LINK_POST.html">$TITLE_POST</a></li>" >> categories/$CAT.html
+done < post_cat.csv
+echo "</ul>" >> categories/$CAT.html
+echo $ORG $PIE_WEB  >> categories/$CAT.html
+done < cat
 rm *~ > /dev/null 2>&1
 else
 echo " "
 fi
-rm posts.csv emacs.csv
-rm  posts4feed.csv postsID.csv 
-rm tag.csv tags.csv tag temp_post.org
-rm category.csv hour image
+rm emacs.csv # posts.csv
+rm posts4feed.csv postsID.csv 
+rm tags.csv tag temp_post.org tag.csv cat post_cat.csv
+rm hour image category.csv
 rm title link description category date date-  
 sed -i '$d' $1
+cp content.js content_blog.js
+else
+echo " "
+exit
 fi
-fi
-fi
-fi
-fi
-fi    
