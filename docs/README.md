@@ -1,4 +1,4 @@
-Cree un blog a partir de un único archivo en orgmode, con toda la potencia de bash.
+# Cree un blog a partir de un único archivo en orgmode, con toda la potencia de bash.
 
 Conservando el archivo blog.org, con la totalidad del contenido del blog en texto plano y org-bash-blog, en cualquier lugar puedes levantar el blog en segundos.
 
