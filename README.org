@@ -353,3 +353,10 @@ NOVEDADES
 - Genera páginas relacionadas por categorías
 - Instalación de paquetes necesarios y autoconfiguración
 - Importanción desde archivos markdown⏎
+
+
+Angel
+
+https://ugeek.github.io
+
+ugeekpodcast@gmail.com
