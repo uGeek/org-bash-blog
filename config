@@ -81,16 +81,16 @@ PIE_WEB=$(echo '<p style="text-align: center;"><a href="http://creativecommons.o
 #################################################################################################################
 
 # POST PROGRAM SCHEDULE
-PROGRAMS_ORG="$HOME/blog/program/program.org"
+PROGRAMS_ORG="/home/angel/blog/program/program.org"
 
 # DRAFT POST                                                                                                                                
-DRAFT_ORG="$HOME/blog/program/draft.org"
+DRAFT_ORG="/home/angel/blog/program/draft.org"
 
 # BLOG FILE
-BLOG_ORG="$HOME/blog/blog.org"
+BLOG_ORG="/home/angel/blog/blog.org"
 
 # BLOG FOLDER
-PATH_BLOG="$HOME/blog/"
+PATH_BLOG="/home/angel/"
 
 # ORG-BASH-BLOG 
 ORG_BASH_BLOG="/usr/bin/org-bash-blog"
