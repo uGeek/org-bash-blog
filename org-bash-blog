@@ -131,7 +131,9 @@ grep -n "^* PROGRAM" $PATH_BLOG/program/draft.org | cut -d ":" -f1 > $TEMP_FILE/
 while read LINEA; do
     FIRSTL=$(grep "$LINEA" $TEMP_FILE/draft.csv | cut -d, -f1)
     LASTL=$(grep "$LINEA" $TEMP_FILE/draft.csv | cut -d, -f2)
+
     sed -n ''$FIRSTL','$LASTL' p' $PATH_BLOG/program/draft.org >> $PATH_BLOG/program/program.org
+
 done < $TEMP_FILE/draft2program
 rm  $TEMP_FILE/firstlines  $TEMP_FILE/lastlines $TEMP_FILE/draft2program $TEMP_FILE/draft.csv $TEMP_FILE/programfirstlines > /dev/null 2>&1
 PROGRAM=$(grep -c "^* BLOG" $PATH_BLOG/program/draft.org)
@@ -152,7 +154,9 @@ grep -n "^* BLOG" $PATH_BLOG/program/draft.org | cut -d ":" -f1 > $TEMP_FILE/dra
 while read LINEA; do
     FIRSTL=$(grep "$LINEA" $TEMP_FILE/draft.csv | cut -d, -f1)
     LASTL=$(grep "$LINEA" $TEMP_FILE/draft.csv | cut -d, -f2)
+
     sed -n ''$FIRSTL','$LASTL' p' $PATH_BLOG/program/draft.org >> $PATH_BLOG/blog.org
+
 done < $TEMP_FILE/draft2program
 rm  $TEMP_FILE/firstlines  $TEMP_FILE/lastlines $TEMP_FILE/draft2program $TEMP_FILE/draft.csv $TEMP_FILE/programfirstlines > /dev/null 2>&1
 sed -i 's|^* PROGRAM|* DONE|g' $PATH_BLOG/program/draft.org
@@ -201,9 +205,9 @@ then
 fi
 if [ $1 = "-i" ] 
 then
-clear 
+clear
 sed -i "s|/home/angel/blog/|$PWD/|g" config
-sed -i "s|source config|source $PWD/config|g" org-bash-blog
+sed -i "s|source config|source $PWD/config|g" org-bash-blog 
 cp org-bash-blog /usr/bin/
 chmod +x /usr/bin/org-bash-blog
 echo "Instalado Org-Bash-Blog"
@@ -259,7 +263,7 @@ echo " org-bash-blog -rp"
 exit 1
 fi
 echo "Previsualizando... "
-PROGRAMS_ORG=$2  
+PROGRAMS_ORG=$2 
 TODO=$(grep -c "^* TODO" $PROGRAMS_ORG)
 echo "
 Programando $TODO Artículos...
@@ -300,6 +304,7 @@ while read LINEA; do
     sed -i 's|</sub>||g' $TITLE_FILE.html
     rm $TITLE_FILE.org
     echo $PIE_WEB >> $TITLE_FILE.html
+
 done < $TEMP_FILE/program.csv
 echo '<head>
 <title></title>
@@ -339,7 +344,8 @@ do
 	ART=$((1+$ART))     
     fi
     echo "$LINEA" >> $PATH_BLOG.temp/$ART.torg
-done < $PROGRAMS_ORG 
+
+done < $PROGRAMS_ORG #program.org
 ls $PATH_BLOG.temp/*.torg -1 > $PATH_BLOG.temp/list.txt
 while read LINEA
 do
@@ -348,6 +354,7 @@ do
 done < $PATH_BLOG.temp/list.txt
 cat $(ls -r $PATH_BLOG.temp/*.torg)  > program.org
 rm $PATH_BLOG.temp/list.txt $PATH_BLOG.temp/*.torg
+
 TODO=$(grep -c "^* TODO" $PROGRAMS_ORG)
 echo "
 Programando $TODO Artículos...
@@ -378,6 +385,7 @@ while read LINEA; do
     DIA=$(echo $LINEA | cut -d, -f3)
     TITLEPROGRAM=$(echo $LINEA | cut -d, -f4- | sed -e 's/^[ \t]*//; s/[ \t]*$//; /^$/d')
     echo "$(date -d "$DIA" +'%m/%d/%Y @ %H:%M -> %m/%d/%Y @ %H:%M')|$TITLEPROGRAM ## org-bash-blog" >> ~/.calcurse/apts
+
     echo "# $(date -d "$DIA" +'%A %d de %B del %Y a las %H:%Mh') -> $TITLEPROGRAM ## org-bash-blog " >> $TEMP_FILE/cron_program
     date -d "$DIA" +'%M %H %d %m * bash '$PATH_SCRIPTS_PROGRAMS''org-bash-blog_program$NUM'.sh'  >> $TEMP_FILE/cron_program
     echo " " >> $TEMP_FILE/cron_program
@@ -1164,7 +1172,7 @@ rm *~ > /dev/null 2>&1
 else
 echo " "
 fi
-rm emacs.csv posts.csv
+rm emacs.csv  posts.csv
 rm posts4feed.csv postsID.csv 
 rm tags.csv tag temp_post.org tag.csv cat post_cat.csv
 rm hour image category.csv
