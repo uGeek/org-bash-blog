@@ -90,7 +90,7 @@ DRAFT_ORG="/home/angel/blog/program/draft.org"
 BLOG_ORG="/home/angel/blog/blog.org"
 
 # BLOG FOLDER
-PATH_BLOG="/home/angel/"
+PATH_BLOG="/home/angel/blog/"
 
 # ORG-BASH-BLOG 
 ORG_BASH_BLOG="/usr/bin/org-bash-blog"
