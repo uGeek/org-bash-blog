@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# <org-bash-blog v5.2.3 . Build a blog from a single orgmode file with pandoc and all the bash power>
+# <org-bash-blog v5.9.5. Build a blog from a single orgmode file with pandoc and all the bash power>
 #
 # Copyright (C) 2019 Angel. uGeek
 # ugeekpodcast@gmail.com
@@ -1162,7 +1162,7 @@ rm *~ > /dev/null 2>&1
 else
 echo " "
 fi
-rm emacs.csv # posts.csv
+rm emacs.csv posts.csv
 rm posts4feed.csv postsID.csv 
 rm tags.csv tag temp_post.org tag.csv cat post_cat.csv
 rm hour image category.csv
