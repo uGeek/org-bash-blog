@@ -69,6 +69,13 @@ ULTIMO_PODCAST=$(wget -q -O- "http://feeds.feedburner.com/ugeek" | grep -o '<enc
 INDEX_NEXT=$(echo "
 * $ULTIMO_TITULO_PODCAST
 #+HTML: <audio controls=''><source src="$ULTIMO_PODCAST" />Tu navegador no soporta reproductor de Podcast.</audio>")
+                                                                                                                                                                     
+#+html:<h4><center> </center></h4><br>                                                                                                                                                                              
+"$(cat /home/angel/blog/categories.org)"                                                                                                                                                                  
+")
+
+
+
 
 # FOOTER WEB. ALL PAGES
 PIE_WEB=$(echo '<p style="text-align: center;"><a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license"><img style="border-width: 0px; display: block; margin-left: auto; margin-right: auto;" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Licencia de Creative Commons" /></a><br />Este obra est&aacute; bajo una <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license">licencia de Creative Commons Reconocimiento-NoComercial-CompartirIgual 4.0 Internacional</a>.</p><br><br><br>')
